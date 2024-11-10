@@ -30,11 +30,16 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 # Copy existing application directory contents
 COPY . /var/www/html/
 
+WORKDIR /var/www/html
+
 # Set ownership and permissions for the /var/www/html directory to www-data
-RUN chown -R www-data:www-data /var/www/html/
+RUN chown -R www-data:www-data /var/www/html/ /var/www/html/storage /var/www/html/bootstrap/cache
+
+RUN composer install
 
 USER www-data
 
+CMD php artisan serve --host=0.0.0.0 --port=9000
 EXPOSE 9000
 
 CMD ["php-fpm"]
