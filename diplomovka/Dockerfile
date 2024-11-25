@@ -2,7 +2,7 @@ FROM php:8.3.11-fpm
 
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
+build-essential \
     libpng-dev \
     libjpeg-dev \
     libwebp-dev \
@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libmcrypt-dev \
     libonig-dev \
     libpq-dev \
+    inkscape \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -33,13 +34,11 @@ COPY . /var/www/html/
 WORKDIR /var/www/html
 
 # Set ownership and permissions for the /var/www/html directory to www-data
-RUN chown -R www-data:www-data /var/www/html/ /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/ /var/www/html/storage /var/www/html/storage/app/public  /var/www/html/storage/app/private /var/www/html/bootstrap/cache
 
 RUN composer install
 
 USER www-data
 
-CMD php artisan serve --host=0.0.0.0 --port=9000
-EXPOSE 9000
 
 CMD ["php-fpm"]
