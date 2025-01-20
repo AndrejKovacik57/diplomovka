@@ -36,7 +36,13 @@ WORKDIR /var/www/html
 # Set ownership and permissions for the /var/www/html directory to www-data
 RUN chown -R www-data:www-data /var/www/html/ /var/www/html/storage /var/www/html/storage/app/public  /var/www/html/storage/app/private /var/www/html/bootstrap/cache
 
+RUN apt-get update
+
 RUN composer install
+
+#RUN npm install
+
+
 
 USER www-data
 
