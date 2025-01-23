@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: ./diplomovka
+      context: backend
       dockerfile: Dockerfile
     restart: unless-stopped
     networks:
@@ -13,7 +13,7 @@ services:
 
   queue-worker:
     build:
-      context: ./diplomovka
+      context: backend
       dockerfile: Dockerfile
     restart: unless-stopped
     networks:
