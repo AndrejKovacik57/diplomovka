@@ -1,17 +1,25 @@
 import React, { useState } from "react";
+import axiosClient from "../axios-client.tsx";
+import {useStateContext} from "../contexts/ContextProvider.tsx";
 
 const ExerciseCreator: React.FC = () => {
-    const [textFieldValue, setTextFieldValue] = useState("");
-    const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+    const [descriptionFieldValue, setDescriptionFieldValue] = useState("");
+    const [titleFieldValue, setTitleFieldValue] = useState("");
+    const [uploadedImage, setUploadedImage] = useState<File []>([]);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
+    const {setToken}= useStateContext();
 
-    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTextFieldValue(e.target.value);
+
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setDescriptionFieldValue(e.target.value);
+    };
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitleFieldValue(e.target.value);
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setUploadedImage(e.target.files[0]);
+        if (e.target.files) {
+            setUploadedImage(Array.from(e.target.files));
         }
     };
 
@@ -21,55 +29,101 @@ const ExerciseCreator: React.FC = () => {
         }
     };
 
-    const handleSubmit = () => {
-        // Here you can handle submission logic
-        console.log("Text Field Value:", textFieldValue);
-        console.log("Uploaded Image:", uploadedImage);
-        console.log("Uploaded Code Files:", uploadedCodeFiles);
+    const handleSubmit = (event:any) => {
+        event.preventDefault()
+        const formData = new FormData();
+
+        formData.append('title', titleFieldValue);
+        formData.append('description', descriptionFieldValue);
+
+        uploadedImage.forEach((image) => {
+            console.log(image.name, image.type);
+            formData.append('images[]', image); // Use 'images[]' to send as an array
+        });
+
+        uploadedCodeFiles.forEach((file) => {
+            console.log(file.name, file.type);
+            formData.append('files[]', file); // Use 'files[]' to send as an array
+        });
+
+        console.log("formData: ", formData)
+        axiosClient.post('/exercise', formData,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+            .then(({data}) => {
+                console.log(data)
+            })
+            .catch(error =>{
+                const response = error.response;
+                if(response && response.status === 422){
+                    console.log(response.data.errors);
+                }
+            })
     };
 
     return (
         <div className="exercise-creator-container">
             <h1>Create Exercise</h1>
-            <div className="form-group">
-                <label htmlFor="text-field">Text Field:</label>
-                <input
-                    id="text-field"
-                    type="text"
-                    value={textFieldValue}
-                    onChange={handleTextChange}
-                />
-            </div>
-            <div className="form-group">
-                <label htmlFor="image-upload">Upload Picture/GIF:</label>
-                <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*,image/gif"
-                    onChange={handleImageUpload}
-                />
-                {uploadedImage && <p>Uploaded Image: {uploadedImage.name}</p>}
-            </div>
-            <div className="form-group">
-                <label htmlFor="code-files-upload">Upload Code Files:</label>
-                <input
-                    id="code-files-upload"
-                    type="file"
-                    accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp"
-                    multiple
-                    onChange={handleCodeFilesUpload}
-                />
-                {uploadedCodeFiles.length > 0 && (
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label htmlFor="title-field">Title:</label>
+                    <input
+                        id="title-field"
+                        type="text"
+                        value={titleFieldValue}
+                        onChange={handleTitleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="description-field">Description:</label>
+                    <textarea
+                        id="description-field"
+                        value={descriptionFieldValue}
+                        rows={10}
+                        cols={30}
+                        onChange={handleDescriptionChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="image-upload">Upload Picture/GIF:</label>
+                    <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*,image/gif"
+                        multiple
+                        onChange={handleImageUpload}
+                    />
                     <ul>
-                        {uploadedCodeFiles.map((file, index) => (
+                        {uploadedImage.map((file, index) => (
                             <li key={index}>{file.name}</li>
                         ))}
                     </ul>
-                )}
-            </div>
-            <button onClick={handleSubmit}>Submit</button>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="code-files-upload">Upload Code Files:</label>
+                    <input
+                        id="code-files-upload"
+                        type="file"
+                        accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json"
+                        multiple
+                        onChange={handleCodeFilesUpload}
+                    />
+                    {uploadedCodeFiles.length > 0 && (
+                        <ul>
+                            {uploadedCodeFiles.map((file, index) => (
+                                <li key={index}>{file.name}</li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+                <div className="form-group">
+                    <button className="btn">Submit</button>
+                </div>
+            </form>
         </div>
-    );
+);
 };
 
 export default ExerciseCreator;

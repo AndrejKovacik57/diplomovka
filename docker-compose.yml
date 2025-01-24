@@ -8,6 +8,9 @@ services:
       - docker-network
     ports:
       - "9000:9000"
+    volumes:
+      - ./backend/storage/private:/var/www/html/storage/private
+      - ./backend/storage/public:/var/www/html/storage/public
     depends_on:
       - db
 

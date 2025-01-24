@@ -18,6 +18,7 @@ build-essential \
     libonig-dev \
     libpq-dev \
     inkscape \
+    iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -32,9 +33,9 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 COPY . /var/www/html/
 
 WORKDIR /var/www/html
-COPY /fonts /var/www/html/storage/app/private/fonts
+
 # Set ownership and permissions for the /var/www/html directory to www-data
-RUN chown -R www-data:www-data /var/www/html/ /var/www/html/storage /var/www/html/storage/app/public  /var/www/html/storage/app/private /var/www/html/storage/app/private/fonts /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/ /var/www/html/storage /var/www/html/storage/app/public  /var/www/html/storage/app/private /var/www/html/bootstrap/cache
 
 
 
