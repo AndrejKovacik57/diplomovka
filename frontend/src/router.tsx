@@ -1,8 +1,10 @@
 import {createBrowserRouter, Navigate} from "react-router-dom";
 import ExerciseCreator from "./views/ExerciseCreator.tsx";
+import ExerciseDisplay from "./views/ExerciseDisplay.tsx";
 import NotFound from "./views/NotFound.tsx";
 import DefaultLayout from "./components/DefaultLayout.tsx";
 import GuestLayout from "./components/GuestLayout.tsx";
+import SolutionDisplay from "./views/SolutionDisplay.tsx";
 
 const router = createBrowserRouter([
     {
@@ -13,6 +15,14 @@ const router = createBrowserRouter([
                 path: '/create',
                 element : <ExerciseCreator/>
             },
+            {
+                path: '/display',
+                element : <ExerciseDisplay/>
+            },
+            {
+                path: '/solution',
+                element : <SolutionDisplay/>
+            }
         ]
     },
     {

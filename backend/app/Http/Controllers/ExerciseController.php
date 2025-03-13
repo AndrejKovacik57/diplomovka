@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,65 +22,62 @@ class ExerciseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ExerciseRequest $request)
     {
-        Log::info('Step 1: Starting store function.');
-        Log::info('Step 1.5: Request data before validation.', ['request' => $request->all(), 'files' => $request->allFiles()]);
-        Log::info('Step 1.6: MIME types of uploaded files.');
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $file) {
-                Log::info('File MIME type:', ['name' => $file->getClientOriginalName(), 'mime' => $file->getMimeType()]);
-            }
-        }
-
-
+        Log::info('test log1');
         DB::beginTransaction();
         try {
-            $fields = $request->validate([
-                'title' => 'required|max:255',
-                'description' => 'required',
-                'images' => 'nullable|array',
-                'images.*' => 'required|file|mimes:jpg,jpeg,png,gif|max:10240', // Set a reasonable max size
-                'files' => 'nullable|array',
-                'files.*' => 'required|file|max:10240',
-            ]);
-            Log::info('Step 2: Fields validated.', ['fields' => $fields]);
-            $exercise = Exercise::create($fields);
-            Log::info('Step 3: Exercise created.', ['exercise_id' => $exercise->id]);
+            $fields = $request->validated();
+            $exercise = Exercise::query()->create($fields);
 
             if ($request->has('images')) {
-                Log::info('Step 4: Processing images.');
                 foreach ($fields['images'] as $pictureFile) {
-                    $filePath = $pictureFile->store('images', 'local'); // Save picture to storage
-                    Log::info('Step 4.1: Image stored.', ['file_path' => $filePath]);
+                    $name = $pictureFile->getClientOriginalName();
+                    $filePath = $pictureFile->store('images', 'local');
                     $exercise->images()->create([
-                        'image_path' => $filePath
+                        'image_path' => $filePath,
+                        'file_name' => $name
                     ]);
-                    Log::info('Step 4.2: Image associated with exercise.');
                 }
             }
-            if ($request->has('files')) {
-                Log::info('Step 5: Processing files.');
-                foreach ($fields['files'] as $file) {
+            if ($request->has('codeFiles')) {
+                foreach ($fields['codeFiles'] as $file) {
+                    $name= $file->getClientOriginalName();
                     $extension = $file->getClientOriginalExtension();
-                    $filePath = $file->store('files', 'local');
+                    $filePath = $file->store('codeFiles', 'local');
+                    $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
+                    $finalPath = $noExtensionFilePath . '.' . $extension;
+
+                    Storage::disk('local')->move($filePath, $finalPath);
+
+                    $exercise->files()->create([
+                        'file_path' => $finalPath,
+                        'file_name' => $name
+                    ]);
+                }
+
+            }
+            if ($request->has('testFiles')) {
+                foreach ($fields['testFiles'] as $file) {
+                    $name= $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $filePath = $file->store('testFiles', 'local');
                     $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
                     $finalPath = $noExtensionFilePath . '.' . $extension;
 
                     // Rename the file to include the extension
                     Storage::disk('local')->move($filePath, $finalPath);
 
-                    $exercise->files()->create([
-                        'file_path' => $finalPath
+                    $exercise->Tests()->create([
+                        'file_path' => $finalPath,
+                        'file_name' => $name
                     ]);
-                    Log::info('Step 5.2: File associated with exercise.');
                 }
 
             }
 
             DB::commit();
-            Log::info('Step 6: Transaction committed.');
-            return $exercise;
+            return response()->json(['exercise' => $exercise], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Failed to create exercise'. $e], 500);
@@ -89,10 +87,41 @@ class ExerciseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Exercise $exercise)
+    public function show($id)
     {
-        return $exercise;
+        $exercise = Exercise::with(['images', 'files'])->findOrFail($id);
+
+        // Transform images to include actual file data
+        $images = $exercise->images->map(function ($image) {
+            return [
+                'id' => $image->id,
+                'file_name' => $image->file_name,
+                'file_data' => base64_encode(Storage::get($image->image_path)), // Convert image to Base64
+            ];
+        });
+
+        // Transform files to include actual file data
+        $files = $exercise->files->map(function ($file) {
+            return [
+                'id' => $file->id,
+                'file_name' => $file->file_name,
+                'file_data' => base64_encode(Storage::get($file->file_path)), // Convert file to Base64
+            ];
+        });
+
+        return response()->json([
+            'exercise' => [
+                'id' => $exercise->id,
+                'title' => $exercise->title,
+                'description' => $exercise->description,
+                'created_at' => $exercise->created_at,
+                'updated_at' => $exercise->updated_at,
+            ],
+            'images' => $images,
+            'files' => $files,
+        ]);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -105,9 +134,8 @@ class ExerciseController extends Controller
                 'title' => 'required|max:255',
                 'description' => 'required',
                 'images' => 'nullable|array',
-    //            'images.*' => 'file|image|max:2048',
-                'files' => 'nullable|array'
-    //            'files.*' => 'file|image|max:2048',
+                'codeFiles' => 'nullable|array',
+                'testFiles' => 'nullable|array'
             ]);
             if ($request->has('pictures')) {
                 foreach ($fields['pictures'] as $pictureFile) {

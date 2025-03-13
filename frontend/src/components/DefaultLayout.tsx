@@ -11,6 +11,8 @@ export default function DefaultLayout() {
             <aside>
                 <Link to={"/"}> Main page </Link>
                 <Link to={"/create"}> Create exercise </Link>
+                <Link to={"/display"}> Display exercise </Link>
+                <Link to={"/solution"}> Display solution </Link>
             </aside>
             <div className="content">
                 <header>

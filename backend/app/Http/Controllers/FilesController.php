@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorefilesRequest;
-use App\Http\Requests\UpdatefilesRequest;
 use App\Models\files;
+use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Psr7\Request;
 
 class FilesController extends Controller
 {
@@ -13,13 +13,17 @@ class FilesController extends Controller
      */
     public function index()
     {
-        //
+        Log::info('test log');
+         return response()->json([
+             'status' => 'ok',
+             'message' => 'Welcome to the Files API'
+         ], 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorefilesRequest $request)
+    public function store(Request $request)
     {
         //
     }
@@ -35,7 +39,7 @@ class FilesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatefilesRequest $request, files $files)
+    public function update(Request $request, files $files)
     {
         //
     }

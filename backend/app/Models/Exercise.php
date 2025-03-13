@@ -21,6 +21,14 @@ class Exercise extends Model
     {
         return $this->hasMany(files::class);
     }
+    public function tests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Tests::class);
+    }
+    public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Solutions::class);
+    }
 
 
 }

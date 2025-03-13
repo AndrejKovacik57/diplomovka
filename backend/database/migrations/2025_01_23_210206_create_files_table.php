@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('exercise_id');
             $table->string('file_path');
+            $table->string('file_name');
             $table->timestamps();
 
             $table->foreign('exercise_id')->references('id')->on('exercises')->onDelete('cascade');

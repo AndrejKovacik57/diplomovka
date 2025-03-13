@@ -10,7 +10,8 @@ class images extends Model
     use HasFactory;
     protected $fillable = [
         'exercise_id',
-        'image_path'
+        'image_path',
+        'file_name'
     ];
 
     public function exercise(): \Illuminate\Database\Eloquent\Relations\BelongsTo
