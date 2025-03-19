@@ -1,32 +1,40 @@
-import {Link, Outlet} from "react-router-dom";
+import { Navigate, Outlet} from "react-router-dom";
+import {useStateContext} from "../contexts/ContextProvider.tsx";
+
+import Header from "./DefaultHeader.tsx";
+import "./Layout.css";
+import "./DefaultLayout.css";
+import {useEffect} from "react";
+import axiosClient from "../axios-client.tsx";
+
 
 export default function DefaultLayout() {
 
+    const {setUser,token} = useStateContext()
 
-    const onLogout = (event:any) =>{
-        event.preventDefault()
+    useEffect(() => {
+        if (!token) return;
+
+        axiosClient.get('/user')
+            .then(({ data }) => {
+                console.log(data);
+                setUser(data);
+            })
+            .catch(error => {
+                console.log(error.response);
+            });
+    }, [token]); // Dependency on token to conditionally run logic
+
+    if (!token){
+        return <Navigate to={"/login"}/>
     }
+
+
     return(
         <div id="defaultLayout">
-            <aside>
-                <Link to={"/"}> Main page </Link>
-                <Link to={"/create"}> Create exercise </Link>
-                <Link to={"/display"}> Display exercise </Link>
-                <Link to={"/solution"}> Display solution </Link>
-            </aside>
+            <Header/>
             <div className="content">
-                <header>
-                    <div>
-                        Header
-                    </div>
-                    <div>
-                        User Info
-                        <a href="#" onClick={onLogout} className={"btn-logout"}>Logout</a>
-                    </div>
-                </header>
-                <main>
-                    <Outlet/>
-                </main>
+                <Outlet/>
             </div>
         </div>
     )

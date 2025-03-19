@@ -43,6 +43,8 @@ class TestsController extends Controller
 
     public function show($id)
     {
+
+
         Log::info('logujem ' . $id);
         $solution = Solutions::query()->findOrFail($id);
 
@@ -68,6 +70,8 @@ class TestsController extends Controller
             $test_path = $test->file_path;
             $test_name = $test->file_name;
 
+            $this->copyFile($test_name, $test_path);
+
             $command = "php ../storage/app/private/tests/{$test_name}";
             exec($command, $output, $exitCode);
 
@@ -78,6 +82,11 @@ class TestsController extends Controller
 
             // Store output
             $testResults= implode("\n", $output);
+        }
+
+        if (Storage::disk('local')->exists('tests/')) {
+            $files = Storage::disk('local')->files('tests/');
+            Storage::disk('local')->delete($files);
         }
 
         return response()->json(['output' => $testResults], 200);

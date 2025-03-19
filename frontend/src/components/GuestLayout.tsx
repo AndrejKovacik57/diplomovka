@@ -1,5 +1,8 @@
 import {Navigate, Outlet} from "react-router-dom";
 import {useStateContext} from "../contexts/ContextProvider.tsx";
+import Header from "./GuestHeader.tsx";
+import "./Layout.css";
+import "./GuestLayout.css";
 
 export default function GuestLayout() {
     const {token} = useStateContext()
@@ -9,9 +12,11 @@ export default function GuestLayout() {
     }
 
     return(
-        <div>
-            GuestLayout
-            <Outlet/>
+        <div id="defaultLayout">
+            <Header/>
+            <div className="content">
+                <Outlet/>
+            </div>
         </div>
     )
 }

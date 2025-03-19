@@ -7,11 +7,18 @@ const ExerciseDisplay: React.FC = () => {
     const [exerciseDetails, setExerciseDetails] = useState<{ title: string; description: string; images: { id: number; file_name: string; file_data: string }[]; files: { id: number; file_name: string; file_data: string }[] } | null>(null);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
 
-    useEffect(() => {
-        fetch("http://localhost:8080/api/exercise")
-            .then(response => response.json())
-            .then(data => setExercises(data))
-            .catch(error => console.error("Error fetching exercises:", error));
+
+    useEffect(() => {axiosClient.get('/exercise',)
+        .then(({data}) => {
+            console.log(data);
+            setExercises(data);
+        })
+        .catch(error =>{
+            const response = error.response;
+            if(response && response.status === 422){
+                console.log(response.data.errors);
+            }
+        })
     }, []);
 
     const handleCodeFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,10 +30,18 @@ const ExerciseDisplay: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         if (selectedExerciseId !== null) {
-            fetch(`http://localhost:8080/api/exercise/${selectedExerciseId}`)
-                .then(response => response.json())
-                .then(data => setExerciseDetails(data))
-                .catch(error => console.error("Error fetching exercise details:", error));
+
+            axiosClient.get(`/exercise/${selectedExerciseId}`)
+                .then(({data}) => {
+                    console.log(data);
+                    setExerciseDetails(data);
+                })
+                .catch(error =>{
+                    const response = error.response;
+                    if(response && response.status === 422){
+                        console.log(response.data.errors);
+                    }
+                })
 
         }
     };

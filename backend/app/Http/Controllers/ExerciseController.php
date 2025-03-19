@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -24,12 +25,17 @@ class ExerciseController extends Controller
      */
     public function store(ExerciseRequest $request)
     {
-        Log::info('test log1');
+        Log::info('test log1 ' . Auth::id());
         DB::beginTransaction();
         try {
             $fields = $request->validated();
-            $exercise = Exercise::query()->create($fields);
-
+            Log::info('test log2');
+            $exercise = Exercise::query()->create([
+                'title' => $fields['title'],
+                'description' => $fields['description'],
+                'user_id' => Auth::id(), // Associate the exercise with the logged-in user
+            ]);
+            Log::info('test log3');
             if ($request->has('images')) {
                 foreach ($fields['images'] as $pictureFile) {
                     $name = $pictureFile->getClientOriginalName();

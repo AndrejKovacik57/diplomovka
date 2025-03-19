@@ -1,12 +1,30 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExerciseController;
-use App\Http\Controllers\FilesController;
 use App\Http\Controllers\SolutionController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\TestsController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 
-Route::apiResource('exercise', ExerciseController::class);
-Route::apiResource('test', \App\Http\Controllers\TestsController::class);
-Route::apiResource('solution', SolutionController::class);
+
+// Protected Routes (Only authenticated users can access)
+Route::middleware('auth:sanctum')->group(function () {
+    // API Resources (Restricted to authenticated users)
+    Route::apiResource('exercise', ExerciseController::class);
+    Route::apiResource('test', TestsController::class);
+    Route::apiResource('solution', SolutionController::class);
+
+    // Logout Route (Authenticated users only)
+    Route::post('logout', [AuthController::class, 'logout']);
+
+    // Get Authenticated User Info
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+});
+
+// Public Routes (Auth-related)
+Route::post('signup', [AuthController::class, 'signUp']);
+Route::post('login', [AuthController::class, 'login']);

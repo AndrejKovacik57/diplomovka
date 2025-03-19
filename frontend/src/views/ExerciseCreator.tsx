@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, {useRef, useState} from "react";
 import axiosClient from "../axios-client.tsx";
-import {useStateContext} from "../contexts/ContextProvider.tsx";
 
 const ExerciseCreator: React.FC = () => {
     const [descriptionFieldValue, setDescriptionFieldValue] = useState("");
@@ -8,7 +7,11 @@ const ExerciseCreator: React.FC = () => {
     const [uploadedImage, setUploadedImage] = useState<File []>([]);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
     const [uploadedTestFiles, setUploadedTestFiles] = useState<File[]>([]);
-    // const {setToken}= useStateContext();
+
+    // Refs for file inputs
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const codeInputRef = useRef<HTMLInputElement>(null);
+    const testInputRef = useRef<HTMLInputElement>(null);
 
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -36,7 +39,7 @@ const ExerciseCreator: React.FC = () => {
         }
     };
 
-    const handleSubmit = (event:any) => {
+    const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault()
         const formData = new FormData();
 
@@ -87,85 +90,104 @@ const ExerciseCreator: React.FC = () => {
     };
 
     return (
-        <div className="exercise-container">
-            <h1>Create Exercise</h1>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="title-field">Title:</label>
-                    <input
-                        id="title-field"
-                        type="text"
-                        value={titleFieldValue}
-                        onChange={handleTitleChange}
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="description-field">Description:</label>
-                    <textarea
-                        id="description-field"
-                        value={descriptionFieldValue}
-                        rows={10}
-                        cols={30}
-                        onChange={handleDescriptionChange}
-                    />
-                </div>
-                <div className={"file-uploads"}>
-
+        <div className="container">
+            <div className="user-box">
+                <h2 className="form-title">Create Exercise</h2>
+                <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="image-upload">Upload Picture/GIF:</label>
+                        <label htmlFor="title-field">Title:</label>
                         <input
-                            id="image-upload"
-                            type="file"
-                            accept="image/*,image/gif"
-                            multiple
-                            onChange={handleImageUpload}
+                            id="title-field"
+                            className="input-field"
+                            type="text"
+                            value={titleFieldValue}
+                            onChange={handleTitleChange}
                         />
-                        <ul>
-                            {uploadedImage.map((file, index) => (
-                                <li key={index}>{file.name}</li>
-                            ))}
-                        </ul>
                     </div>
                     <div className="form-group">
-                        <label htmlFor="code-files-upload">Upload Code Files:</label>
-                        <input
-                            id="code-files-upload"
-                            type="file"
-                            accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                            multiple
-                            onChange={handleCodeFilesUpload}
+                        <label htmlFor="description-field">Description:</label>
+                        <textarea
+                            id="description-field"
+                            value={descriptionFieldValue}
+                            rows={10}
+                            cols={30}
+                            onChange={handleDescriptionChange}
                         />
-                        {uploadedCodeFiles.length > 0 && (
+                    </div>
+                    <div className={"file-uploads"}>
+
+                        <div className="form-group form-group-files">
+                            <label htmlFor="image-upload">Upload Picture/GIF:</label>
+                            <button type="button" className="btn-upload btn-primary" onClick={() => imageInputRef.current?.click()}>
+                                Select Image Files
+                            </button>
+                            <input
+                                ref={imageInputRef}
+                                id="image-upload"
+                                className="input-field-file"
+                                type="file"
+                                accept="image/*,image/gif"
+                                multiple
+                                onChange={handleImageUpload}
+                            />
                             <ul>
-                                {uploadedCodeFiles.map((file, index) => (
+                                {uploadedImage.map((file, index) => (
                                     <li key={index}>{file.name}</li>
                                 ))}
                             </ul>
-                        )}
+                        </div>
+                        <div className="form-group form-group-files">
+                            <label htmlFor="code-files-upload">Upload Code Files:</label>
+                            <button type="button" className="btn-upload btn-primary" onClick={() => codeInputRef.current?.click()}>
+                                Select Code Files
+                            </button>
+                            <input
+                                ref={codeInputRef}
+                                id="code-files-upload"
+                                className="input-field-file"
+                                type="file"
+                                accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
+                                multiple
+                                onChange={handleCodeFilesUpload}
+                            />
+                            {uploadedCodeFiles.length > 0 && (
+                                <ul>
+                                    {uploadedCodeFiles.map((file, index) => (
+                                        <li key={index}>{file.name}</li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                        <div className="form-group form-group-files">
+                            <label htmlFor="test-files-upload">Test Files:</label>
+                            <button type="button" className="btn-upload btn-primary" onClick={() => testInputRef.current?.click()}>
+                                Select Test Files
+                            </button>
+                            <input
+                                ref={testInputRef}
+                                id="test-files-upload"
+                                className="input-field-file"
+                                type="file"
+                                accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
+                                multiple
+                                onChange={handleTestFilesUpload}
+                            />
+                            {uploadedTestFiles.length > 0 && (
+                                <ul>
+                                    {uploadedTestFiles.map((file, index) => (
+                                        <li key={index}>{file.name}</li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
                     </div>
                     <div className="form-group">
-                        <label htmlFor="test-files-upload">Test Files:</label>
-                        <input
-                            id="test-files-upload"
-                            type="file"
-                            accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                            multiple
-                            onChange={handleTestFilesUpload}
-                        />
-                        {uploadedTestFiles.length > 0 && (
-                            <ul>
-                                {uploadedTestFiles.map((file, index) => (
-                                    <li key={index}>{file.name}</li>
-                                ))}
-                            </ul>
-                        )}
+                        <button className="btn-primary">Submit</button>
                     </div>
+                </form>
 
-                </div>
-                <div className="form-group">
-                    <button className="btn">Submit</button>
-                </div>
-            </form>
+            </div>
         </div>
 );
 };

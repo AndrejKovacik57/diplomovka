@@ -1,54 +1,3 @@
-body{
-    margin: 0;
-    padding: 0;
-    font-family: 'Open Sans', sans-serif;
-}
-html, body, #root, #defaultLayout, #guestLayout {
-    min-height: 100vh;
-}
-#defaultLayout {
-    display: flex;
-}
-
-#defaultLayout aside {
-    width: 12vw;
-    background-color: rgba(0, 106, 255, 0.87);
-    padding: 1rem;
-}
-
-#defaultLayout aside > a {
-    display: block;
-    padding: 1rem 0 1rem 2.5rem;
-    color: white;
-    border-radius: 8px;
-    transition: all 0.3s;
-    text-decoration: none;
-}
-
-#defaultLayout aside > a:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-#defaultLayout .content {
-    flex: 1;
-}
-
-#defaultLayout header {
-    height: 5vh;
-    padding: 2rem 3rem;
-    background-color: white;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#defaultLayout main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 5rem;
-}
 .exercise-container{
     width: 70%;
     display: flex;
@@ -90,5 +39,5 @@ html, body, #root, #defaultLayout, #guestLayout {
 }
 .exercise-media{
     padding-bottom: 1rem;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
