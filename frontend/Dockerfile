@@ -1,4 +1,4 @@
-FROM node:21.1.0-alpine
+FROM node:current-alpine
 
 WORKDIR /app
 
@@ -24,18 +24,3 @@ EXPOSE 80
 
 # We'll rely on external nginx.conf or default site config that proxies /api.
 CMD ["nginx", "-g", "daemon off;"]
-
-#WORKDIR /app
-#
-#COPY src ./src
-#COPY public ./public
-#
-#COPY .env ./
-#COPY package.json package-lock.json ./
-#COPY tsconfig.json ./
-#
-#RUN apk update
-#
-#RUN npm install
-#
-#CMD ["npm", "start"]
