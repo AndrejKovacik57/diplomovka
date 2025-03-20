@@ -28,12 +28,16 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_pgsql mbstring zip exif pcntl bcmath opcache
 
 # Install Composer
-COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');"
+
+
 COPY . /var/www/html
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-RUN composer install
+RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 8000
 
