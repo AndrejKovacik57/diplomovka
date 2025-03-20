@@ -2,15 +2,40 @@ FROM node:21.1.0-alpine
 
 WORKDIR /app
 
-COPY src ./src
-COPY public ./public
-
-COPY .env.local ./
 COPY package.json package-lock.json ./
-COPY tsconfig.json ./
-
-RUN apk update
-
 RUN npm install
 
-CMD ["npm", "start"]
+COPY . /app
+
+# Build the production assets
+RUN npm run build
+
+
+# Stage 2: Serve with Nginx
+FROM nginx:stable-alpine
+
+# Remove default nginx website config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy build output to nginx html folder
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+# We'll rely on external nginx.conf or default site config that proxies /api.
+CMD ["nginx", "-g", "daemon off;"]
+
+#WORKDIR /app
+#
+#COPY src ./src
+#COPY public ./public
+#
+#COPY .env ./
+#COPY package.json package-lock.json ./
+#COPY tsconfig.json ./
+#
+#RUN apk update
+#
+#RUN npm install
+#
+#CMD ["npm", "start"]
