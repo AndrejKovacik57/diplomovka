@@ -13,14 +13,6 @@ services:
     depends_on:
       - db
 
-#  test_runner:
-#    build:
-#      context: .
-#      dockerfile: testrunner/Dockerfile
-#    volumes:
-#      - ./tests:/var/www/html/storage/private/tests
-
-
   nginx:
     image: nginx:latest
     ports:
@@ -28,7 +20,7 @@ services:
       - "433:433"
     volumes:
       - ./diplomovka:/var/www/html
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx-dev.conf:/etc/nginx/conf.d/default.conf
     networks:
       - docker-network
     depends_on:

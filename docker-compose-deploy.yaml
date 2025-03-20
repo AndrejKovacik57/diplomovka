@@ -1,0 +1,61 @@
+x-common-variables: &common-variables
+  POSTGRES_DB: postgres-database
+  POSTGRES_USER: postgres-username
+  POSTGRES_PASSWORD: postgres-password
+
+
+services:
+  reverse-proxy:
+    image: nginx:latest
+    ports:
+      - 80:3000 # frontend
+    volumes:
+      - ./diplomovka:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - postgres
+    links:
+      - frontend
+      - postgres
+  frontend:
+    build: ./frontend/
+    image: diplomovka-frontend:latest
+    expose:
+      - "3000"
+      -
+  backend:
+    build: ./backend/
+    image: diplomovka-backend:latest
+    environment:
+      DB_URL: postgresql://postgres-username:postgres-password@postgres:5432/postgres-database
+      DB_URL_TEST: postgresql://admin:admin@postgres-test:5432/test
+    expose:
+      - "8502"
+    depends_on:
+      - postgres
+    links:
+      - postgres
+      - db
+      -
+  postgres:
+    image: bitnami/postgresql:16.3.0
+    platform: linux/amd64
+    environment: *common-variables
+    expose:
+      - "5432"
+    volumes:
+      - db-data:/bitnami/postgresql
+      -
+  postgres-test:
+    image: bitnami/postgresql:16.3.0
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    expose:
+      - "5432"
+
+volumes:
+  postgres:
