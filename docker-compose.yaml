@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: backend
-      dockerfile: backend/DockerfileDev
+      dockerfile: DockerfileDev
     restart: unless-stopped
     networks:
       - docker-network

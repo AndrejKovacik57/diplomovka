@@ -13,6 +13,7 @@ services:
       - backend
     networks:
       - app-network
+    restart: always
 
   backend:
     build:
@@ -20,14 +21,16 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     env_file:
-      - ./backend/.env  # or specify environment in docker-compose directly
-    # If you're using artisan serve:
+      - ./backend/.env
     ports:
       - "8000:8000"
     depends_on:
       - postgres
+    restart: always
     networks:
       - app-network
+    volumes:
+      - ./backend/storage:/var/www/html/storage
 
   postgres:
     image: postgres:14
@@ -40,6 +43,7 @@ services:
       - db-data:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: always
 
 networks:
   app-network:
