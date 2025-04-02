@@ -40,32 +40,33 @@ const ExerciseDisplay: React.FC = () => {
     };
 
     return (
-        <div className="exercise-container">
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="exercise">Select an Solution:</label>
-                    <select
-                        id="exercise"
-                        className="form-control"
-                        onChange={(e) => setSelectedSolutionId(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">-- Select --</option>
-                        {solutions.map((solution) => (
-                            <option key={solution.id} value={solution.id}>{solution.id +" - "+ solution.file_name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <button className="btn">Submit</button>
-                </div>
-                {output && (
-                    <div className="output-result">
-                        <strong>Output:</strong> {output}
+        <div className="container">
+            <div className="user-box">
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="exercise">Select an Solution:</label>
+                        <select
+                            id="exercise"
+                            className="form-control"
+                            onChange={(e) => setSelectedSolutionId(Number(e.target.value))}
+                            required
+                        >
+                            <option value="">-- Select --</option>
+                            {solutions.map((solution) => (
+                                <option key={solution.id} value={solution.id}>{solution.id +" - "+ solution.file_name}</option>
+                            ))}
+                        </select>
                     </div>
-                )}
-            </form>
-
+                    <div className="form-group">
+                        <button className="btn-primary">Submit</button>
+                    </div>
+                    {output && (
+                        <div className="output-result">
+                            <strong>Output:</strong> {output}
+                        </div>
+                    )}
+                </form>
+            </div>
         </div>
     );
 };
