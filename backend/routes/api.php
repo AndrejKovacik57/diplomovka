@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthControllerGoogle;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\SolutionController;
 use App\Http\Controllers\TestsController;
@@ -28,3 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public Routes (Auth-related)
 Route::post('signup', [AuthController::class, 'signUp']);
 Route::post('login', [AuthController::class, 'login']);
+
+Route::get('auth', [AuthControllerGoogle::class, 'redirectToAuth']);
+Route::get('auth/callback', [AuthControllerGoogle::class, 'handleAuthCallback']);
