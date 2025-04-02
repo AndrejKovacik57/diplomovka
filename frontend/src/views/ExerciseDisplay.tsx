@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import axiosClient from "../axios-client.tsx";
 
 const ExerciseDisplay: React.FC = () => {
     const [exercises, setExercises] = useState<{ id: number; title: string; description: string }[]>([]);
     const [selectedExerciseId, setSelectedExerciseId] = useState<number | null>(null);
-    const [exerciseDetails, setExerciseDetails] = useState<{ title: string; description: string; images: { id: number; file_name: string; file_data: string }[]; files: { id: number; file_name: string; file_data: string }[] } | null>(null);
+    const [exerciseDetails, setExerciseDetails] = useState<{ exercise: { title: string; description: string }; images: { id: number; file_name: string; file_data: string }[]; files: { id: number; file_name: string; file_data: string }[] } | null>(null);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
 
+    const solutionInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {axiosClient.get('/exercise',)
         .then(({data}) => {
@@ -73,81 +74,89 @@ const ExerciseDisplay: React.FC = () => {
     };
 
     return (
-        <div className="exercise-container">
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="exercise">Select an Exercise:</label>
-                    <select
-                        id="exercise"
-                        className="form-control"
-                        onChange={(e) => setSelectedExerciseId(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">-- Select --</option>
-                        {exercises.map((exercise) => (
-                            <option key={exercise.id} value={exercise.id}>{exercise.title}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group">
-                    <button className="btn">Submit</button>
-                </div>
-            </form>
-
-            {exerciseDetails && (
-                <div className="exercise-details">
-                    <h3>{exerciseDetails.title}</h3>
-                    <p>{exerciseDetails.description}</p>
-
-                    <div className="exercise-media">
-                        <h4>Images</h4>
-                        <div className="image-gallery">
-                            {exerciseDetails.images.map(image => (
-                                <img
-                                    key={image.id}
-                                    src={`data:image/${image.file_name.split('.').pop()};base64,${image.file_data}`}
-                                    alt={image.file_name}
-                                    className="exercise-image"
-                                />
+        <div className="container">
+            <div className="user-box">
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="exercise">Select an Exercise:</label>
+                        <select
+                            id="exercise"
+                            className="form-control"
+                            onChange={(e) => setSelectedExerciseId(Number(e.target.value))}
+                            required
+                        >
+                            <option value="">-- Select --</option>
+                            {exercises.map((exercise) => (
+                                <option key={exercise.id} value={exercise.id}>{exercise.title}</option>
                             ))}
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <button className="btn-primary">Submit</button>
+                    </div>
+                </form>
+                <hr/>
+
+                {exerciseDetails && (
+                    <div className="exercise-details">
+                        <h2>{exerciseDetails.exercise.title}</h2>
+                        <p>{exerciseDetails.exercise.description}</p>
+
+                        <div className="exercise-media">
+                            <h4>Images</h4>
+                            <div className="image-gallery">
+                                {exerciseDetails.images.map(image => (
+                                    <img
+                                        key={image.id}
+                                        src={`data:image/${image.file_name.split('.').pop()};base64,${image.file_data}`}
+                                        alt={image.file_name}
+                                        className="exercise-image"
+                                    />
+                                ))}
+                            </div>
+
+                            <h4>Attached Files</h4>
+                            <ul className="file-list">
+                                {exerciseDetails.files.map(file => (
+                                    <li key={file.id}>
+                                        <a href={`data:application/octet-stream;base64,${file.file_data}`} download={file.file_name}>{file.file_name}</a>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
+                        <div className="exercise-solution">
 
-                        <h4>Files</h4>
-                        <ul className="file-list">
-                            {exerciseDetails.files.map(file => (
-                                <li key={file.id}>
-                                    <a href={`data:application/octet-stream;base64,${file.file_data}`} download={file.file_name}>{file.file_name}</a>
-                                </li>
-                            ))}
-                        </ul>
+                            <form onSubmit={handleSubmitSolution}>
+                                <div className="form-group">
+                                    <label htmlFor="code-files-upload">Upload Code Files:</label>
+                                    <button type="button" className="btn-upload btn-primary" onClick={() => solutionInputRef.current?.click()}>
+                                        Select Solution Files
+                                    </button>
+                                    <input
+                                        ref={solutionInputRef}
+                                        id="code-files-upload"
+                                        className="input-field-file"
+                                        type="file"
+                                        accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
+                                        multiple
+                                        onChange={handleCodeFilesUpload}
+                                    />
+                                    {uploadedCodeFiles.length > 0 && (
+                                        <ul>
+                                            {uploadedCodeFiles.map((file, index) => (
+                                                <li key={index}>{file.name}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <button className="btn-primary">Submit</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div className="exercise-solution">
-
-                        <form onSubmit={handleSubmitSolution}>
-                            <div className="form-group">
-                                <label htmlFor="code-files-upload">Upload Code Files:</label>
-                                <input
-                                    id="code-files-upload"
-                                    type="file"
-                                    accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                                    multiple
-                                    onChange={handleCodeFilesUpload}
-                                />
-                                {uploadedCodeFiles.length > 0 && (
-                                    <ul>
-                                        {uploadedCodeFiles.map((file, index) => (
-                                            <li key={index}>{file.name}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                            <div className="form-group">
-                                <button className="btn">Submit</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
