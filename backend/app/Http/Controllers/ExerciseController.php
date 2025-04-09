@@ -13,11 +13,16 @@ use Illuminate\Support\Facades\Storage;
 class ExerciseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource for user.
      */
     public function index()
     {
-        return Exercise::all();
+        $user = Auth::user();
+        $exerciseIds = DB::table('exercise_user_uids')
+            ->where('uid', $user->uid)
+            ->pluck('exercise_id');
+
+        return Exercise::query()->whereIn('id', $exerciseIds)->get();
     }
 
     /**
@@ -28,7 +33,7 @@ class ExerciseController extends Controller
         Log::info('test log1 ' . Auth::id());
         DB::beginTransaction();
         try {
-            $fields = $request->validated();
+                $fields = $request->validated();
             Log::info('test log2');
             $exercise = Exercise::query()->create([
                 'title' => $fields['title'],
@@ -78,6 +83,29 @@ class ExerciseController extends Controller
                         'file_path' => $finalPath,
                         'file_name' => $name
                     ]);
+                }
+
+            }
+
+            if ($request->has('csvFiles')) {
+                foreach ($request->file('csvFiles', []) as $csvFile) {
+                    if (($handle = fopen($csvFile->getRealPath(), 'r')) !== false) {
+                        $header = fgetcsv($handle); // Get header row
+
+                        while (($row = fgetcsv($handle)) !== false) {
+                            $uid = end($row);
+                            if (!$uid) {
+                                continue;
+                            }
+
+                            DB::table('exercise_user_uids')->updateOrInsert(
+                                ['exercise_id' => $exercise->id, 'uid' => $uid],
+                                ['created_at' => now(), 'updated_at' => now()]
+                            );
+                        }
+
+                        fclose($handle);
+                    }
                 }
 
             }

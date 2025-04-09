@@ -9,8 +9,16 @@ interface User {
     first_name: string;
     last_name: string;
     email: string;
-    role?: string;
+    stuba_email: string;
+    uid: string;
+    uisid: number;
+    employee_type: string;
+    google_id: string;
+    email_verified_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
+
 
 interface ContextType {
     user: User | null;

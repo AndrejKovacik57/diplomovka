@@ -19,12 +19,14 @@ build-essential \
     libpq-dev \
     inkscape \
     iputils-ping \
+    libldap2-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd \
-    && docker-php-ext-install pdo pdo_pgsql mbstring zip exif pcntl bcmath opcache
+    && docker-php-ext-configure ldap \
+    && docker-php-ext-install gd pdo pdo_pgsql mbstring zip exif pcntl bcmath opcache ldap
 
 # Install Composer
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer

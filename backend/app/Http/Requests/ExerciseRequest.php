@@ -29,7 +29,9 @@ class ExerciseRequest extends FormRequest
             'codeFiles' => 'nullable|array',
             'codeFiles.*' => 'file|max:10240',
             'testFiles' => 'nullable|array',
-            'testFiles.*' => 'file|max:10240'
+            'testFiles.*' => 'file|max:10240',
+            'csvFiles' => 'nullable|array',
+            'csvFiles.*' => 'file|max:10240'
         ];
     }
 }

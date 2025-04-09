@@ -8,6 +8,7 @@ import DefaultLayout from "./components/DefaultLayout.tsx";
 import GuestLayout from "./components/GuestLayout.tsx";
 import SolutionDisplay from "./views/SolutionDisplay.tsx";
 import GoogleCallBack from "./views/GoogleCallBack.tsx";
+import UserSettings from "./views/UserSettings.tsx";
 
 const router = createBrowserRouter([
     {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
             {
                 path: '/solution',
                 element: <SolutionDisplay />
+            },
+            {
+                path: '/settings',
+                element: <UserSettings/>
             },
             {
                 path: '/',

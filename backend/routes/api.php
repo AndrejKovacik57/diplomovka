@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AuthControllerGoogle;
+use App\Http\Controllers\AuthControllerThirdParty;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\SolutionController;
 use App\Http\Controllers\TestsController;
@@ -17,6 +17,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('test', TestsController::class);
     Route::apiResource('solution', SolutionController::class);
 
+    Route::post('aislog', [AuthControllerThirdParty::class, 'AISLogin']);
+
     // Logout Route (Authenticated users only)
     Route::post('logout', [AuthController::class, 'logout']);
 
@@ -30,5 +32,5 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('signup', [AuthController::class, 'signUp']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::get('auth', [AuthControllerGoogle::class, 'redirectToAuth']);
-Route::get('auth/callback', [AuthControllerGoogle::class, 'handleAuthCallback']);
+Route::get('auth', [AuthControllerThirdParty::class, 'redirectToAuthGoogle']);
+Route::get('auth/callback', [AuthControllerThirdParty::class, 'handleAuthCallback']);

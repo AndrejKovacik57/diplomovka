@@ -39,6 +39,9 @@ const Header = () => {
                     <li>
                         <Link to="/solution" className="nav-item">Display solution</Link>
                     </li>
+                    <li>
+                        <Link to="/settings" className="nav-item">Settings</Link>
+                    </li>
                 </ul>
             </nav>
             <div className="user-info">

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\files;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Psr7\Request;
+use Illuminate\Http\Request;
 
 class FilesController extends Controller
 {

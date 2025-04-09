@@ -7,11 +7,13 @@ const ExerciseCreator: React.FC = () => {
     const [uploadedImage, setUploadedImage] = useState<File []>([]);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
     const [uploadedTestFiles, setUploadedTestFiles] = useState<File[]>([]);
+    const [uploadedCSVFiles, setUploadedCSVFiles] = useState<File[]>([]);
 
     // Refs for file inputs
     const imageInputRef = useRef<HTMLInputElement>(null);
     const codeInputRef = useRef<HTMLInputElement>(null);
     const testInputRef = useRef<HTMLInputElement>(null);
+    const csvInputRef = useRef<HTMLInputElement>(null);
 
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -38,6 +40,11 @@ const ExerciseCreator: React.FC = () => {
             setUploadedTestFiles(Array.from(e.target.files));
         }
     };
+    const handleCSVFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setUploadedCSVFiles(Array.from(e.target.files));
+        }
+    };
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault()
@@ -58,6 +65,11 @@ const ExerciseCreator: React.FC = () => {
         uploadedTestFiles.forEach((file) => {
             console.log(file.name, file.type);
             formData.append('testFiles[]', file); // Use 'files[]' to send as an array
+        });
+
+        uploadedCSVFiles.forEach((file) => {
+            console.log(file.name, file.type);
+            formData.append('csvFiles[]', file);
         });
 
         console.log("formData: ", formData)
@@ -182,6 +194,30 @@ const ExerciseCreator: React.FC = () => {
                         </div>
 
                     </div>
+
+                    <div className="form-group form-group-files">
+                        <label htmlFor="csv-files-upload">Csv File:</label>
+                        <button type="button" className="btn-upload btn-primary" onClick={() => csvInputRef.current?.click()}>
+                            Select CSV File
+                        </button>
+                        <input
+                            ref={csvInputRef}
+                            id="csv-files-upload"
+                            className="input-field-file"
+                            type="file"
+                            accept=".csv"
+                            multiple
+                            onChange={handleCSVFilesUpload}
+                        />
+                        {uploadedCSVFiles.length > 0 && (
+                            <ul>
+                                {uploadedCSVFiles.map((file, index) => (
+                                    <li key={index}>{file.name}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+
                     <div className="form-group">
                         <button className="btn-primary">Submit</button>
                     </div>

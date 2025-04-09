@@ -24,6 +24,10 @@ class User extends Authenticatable
         'email',
         'password',
         'google_id',
+        'uid',
+        'uisid',
+        'stuba_email',
+        'employee_type',
     ];
 
     /**

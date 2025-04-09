@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SolutionRequest;
 use App\Models\Exercise;
 use App\Models\Solutions;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,8 @@ class SolutionController extends Controller
      */
     public function index()
     {
-        return Solutions::all();
+        $user = Auth::user();
+        return $user->solutions;
     }
 
     /**
