@@ -8,6 +8,7 @@ use App\Models\Solutions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class SolutionController extends Controller
@@ -18,7 +19,19 @@ class SolutionController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return $user->solutions;
+
+        Log::info('User in /solution route: ', [$user]);
+        Log::info('User ID: ' . optional($user)->id);
+
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+
+        $solutions = $user->solutions;
+
+        Log::info('Solutions count: ' . $solutions->count());
+
+        return response()->json($solutions);
     }
 
     /**
@@ -26,6 +39,9 @@ class SolutionController extends Controller
      */
     public function store(SolutionRequest $request)
     {
+
+
+        Log::info('test solution log1 ' . Auth::id());
         $fields = $request->validated();
         $exerciseID = $fields['exerciseId'];
         $exercise = Exercise::with(['tests'])->findOrFail($exerciseID);
@@ -44,7 +60,8 @@ class SolutionController extends Controller
 
                     $solution = $exercise->solutions()->create([
                         'file_path' => $finalPath,
-                        'file_name' => $name
+                        'file_name' => $name,
+                        'user_id' => Auth::id()
                     ]);
                 }
 

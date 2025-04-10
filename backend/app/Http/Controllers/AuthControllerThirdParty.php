@@ -141,19 +141,32 @@ class AuthControllerThirdParty extends Controller
 
                 $user = User::query()->findOrFail(Auth::id());
                 if ($user){
-                    $user->uid = $userData['uid'];
-                    $user->uisid = $userData['uisid'];
-                    $user->stuba_email = $userData['mail'];
-                    $user->employee_type = $userData['employeetype'];
-                    $user->save();
+                    try {
+                        DB::beginTransaction();
+                        $user->uid = $userData['uid'];
+                        $user->uisid = $userData['uisid'];
+                        $user->stuba_email = $userData['mail'];
+                        $user->employee_type = $userData['employeetype'];
+                        $user->save();
+                        $token = $user->createToken('main')->plainTextToken;
+
+                        DB::commit();
+
+                        return response()->json(['user' => $user, 'token' => $token], 200);
+                    }catch (\Exception $e) {
+                        DB::rollBack();
+
+                        return response()->json(['error' => 'Failed to create user with google'. $e], 500);
+                    }
+
+                }else{
+                    return response()->json([
+                        'error' => "You are not logged in"
+                    ], 401);
 
                 }
 
 
-                return response()->json([
-                    'message' => 'LDAP login successful',
-                    'user' => $userData,
-                ], 200);
 
             } else {
 

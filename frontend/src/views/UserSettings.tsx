@@ -6,7 +6,7 @@ import {useStateContext} from "../contexts/ContextProvider.tsx";
 const UserSettings: React.FC = () => {
     const [aisIdFieldValue, setAisIdFieldValue] = useState("");
     const [password, setPassword] = useState("");
-    const {user} = useStateContext();
+    const {user, setUser,setToken} = useStateContext();
     console.log(user?.uid)
     const handleAisIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setAisIdFieldValue(e.target.value);
@@ -24,6 +24,8 @@ const UserSettings: React.FC = () => {
         axiosClient.post('/aislog', payLoad)
             .then(({data}) => {
                 console.log(data)
+                setUser(data.user);
+                setToken(data.token);
             })
             .catch(error =>{
                 const response = error.response;

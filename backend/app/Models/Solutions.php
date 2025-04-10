@@ -10,6 +10,7 @@ class Solutions extends Model
     use HasFactory;
     protected $fillable = [
         'exercise_id',
+        'user_id',
         'file_path',
         'file_name'
     ];
