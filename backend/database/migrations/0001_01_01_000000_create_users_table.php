@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('google_id')->nullable();
             $table->string('password')->nullable();
+            $table->boolean('is_teacher')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

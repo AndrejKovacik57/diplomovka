@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('solutions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('exercise_id');
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('exercise_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->unique(['course_id', 'exercise_id', 'user_id']);
             $table->string('file_path');
             $table->string('file_name');
+            $table->timestamp('submitted_at')->useCurrent();
+
             $table->timestamps();
-
-            $table->foreign('exercise_id')->references('id')->on('exercises')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
         });
     }
 

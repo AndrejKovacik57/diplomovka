@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exercise_user_uids', function (Blueprint $table) {
+        Schema::create('course_enrollments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('exercise_id')->constrained()->onDelete('cascade');
-            $table->string('uid'); // This can exist regardless of user presence
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->string('uid')->unique();
+            $table->unique(['course_id', 'uid']);
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exercise_user_uids');
+        Schema::dropIfExists('course_enrollments');
     }
 };

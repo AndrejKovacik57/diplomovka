@@ -28,6 +28,7 @@ class User extends Authenticatable
         'uisid',
         'stuba_email',
         'employee_type',
+        'is_teacher',
     ];
 
     /**
@@ -53,13 +54,21 @@ class User extends Authenticatable
         ];
     }
 
-    public function exercises(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function courses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(Exercise::class);
+        return $this->belongsToMany(Course::class);
     }
-    public function solutions()
+    public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Solutions::class);
     }
 
+
+    public function hasSubmittedSolution($courseId, $exerciseId): bool
+    {
+        return $this->solutions()
+            ->where('course_id', $courseId)
+            ->where('exercise_id', $exerciseId)
+            ->exists();
+    }
 }

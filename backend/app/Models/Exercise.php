@@ -9,7 +9,6 @@ class Exercise extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',
         'title',
         'description'
     ];
@@ -26,13 +25,13 @@ class Exercise extends Model
     {
         return $this->hasMany(Tests::class);
     }
+    public function courses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Course::class);
+    }
     public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Solutions::class);
-    }
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
 
