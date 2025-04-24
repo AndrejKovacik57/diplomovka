@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CourseEnrollment;
 use App\Models\User;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Http\JsonResponse;
@@ -149,6 +150,24 @@ class AuthControllerThirdParty extends Controller
                         $user->employee_type = $userData['employeetype'];
                         $user->save();
                         $token = $user->createToken('main')->plainTextToken;
+
+                        $enrollments = CourseEnrollment::query()->where('uid', $user->uid)->get();
+
+                        foreach ($enrollments as $enrollment) {
+                            $enrollment->uid = $userData['uid'];
+                            $course = $enrollment->course;
+
+                            if ($enrollment->uid === $user->uid) {
+                                // Attach user to course if not already attached
+                                if (!$course->users()->where('user_id', $user->id)->exists()) {
+                                    $course->users()->attach($user->id);
+                                }
+
+                                // Remove enrollment entry
+                                $enrollment->delete();
+                            }
+                        }
+
 
                         DB::commit();
 
