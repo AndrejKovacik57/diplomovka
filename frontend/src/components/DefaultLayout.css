@@ -5,7 +5,7 @@
     cursor: pointer;
     transition: background 0.2s;
     width: fit-content;
-    font-size: 1.5rem;
+    font-size: 1rem;
     text-decoration: none;
 
     color: black;
@@ -65,10 +65,6 @@
 .form-group input, .form-group textarea, .form-group button{
     font-size: 1.2rem;
 }
-#title-field{
-    height: 1.5rem;
-    border-radius: 10px;
-}
 .description-field{
 
 }
@@ -97,4 +93,35 @@
     margin-bottom: 0.5rem;
     border-radius: 8px;
     object-fit: contain;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-sizing: border-box;
+    height: 2.5rem;   /* Ensures consistent height */
+    line-height: 1.2rem;
+}
+
+/* Optional: Add a background arrow for the dropdown */
+.form-group select {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4L2%200zm0%205L0%203h4l-2%202z%22/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 0.65rem auto;
+}
+
+/* On focus */
+.form-group select:focus {
+    outline: none;
+    border-color: #888;
+    box-shadow: 0 0 3px rgba(100, 100, 100, 0.3);
 }

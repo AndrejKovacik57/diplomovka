@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,26 +13,23 @@ use Illuminate\Support\Facades\Storage;
 
 class ExerciseController extends Controller
 {
-    /**
-     * Display a listing of the resource for user.
-     */
-    public function index()
+
+    public function index(): JsonResponse
     {
-        $user = Auth::user();
+        $exercises = Exercise::all();
 
-
-        return null;
+        return response()->json(['exercises' => $exercises], 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ExerciseRequest $request)
+    public function store(ExerciseRequest $request): JsonResponse
     {
         Log::info('test log1 ' . Auth::id());
         DB::beginTransaction();
         try {
-                $fields = $request->validated();
+            $fields = $request->validated();
             Log::info('test log2');
             $exercise = Exercise::query()->create([
                 'title' => $fields['title'],
@@ -85,28 +83,7 @@ class ExerciseController extends Controller
 
             }
 
-//            if ($request->has('csvFiles')) {
-//                foreach ($request->file('csvFiles', []) as $csvFile) {
-//                    if (($handle = fopen($csvFile->getRealPath(), 'r')) !== false) {
-//                        $header = fgetcsv($handle); // Get header row
-//
-//                        while (($row = fgetcsv($handle)) !== false) {
-//                            $uid = end($row);
-//                            if (!$uid) {
-//                                continue;
-//                            }
-//
-//                            DB::table('exercise_user_uids')->updateOrInsert(
-//                                ['exercise_id' => $exercise->id, 'uid' => $uid],
-//                                ['created_at' => now(), 'updated_at' => now()]
-//                            );
-//                        }
-//
-//                        fclose($handle);
-//                    }
-//                }
-//
-//            }
+
 
             DB::commit();
             return response()->json(['exercise' => $exercise], 200);
@@ -191,7 +168,7 @@ class ExerciseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Exercise $exercise)
+    public function destroy(Exercise $exercise): array
     {
         $exercise->delete();
 

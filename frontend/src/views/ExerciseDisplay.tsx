@@ -12,7 +12,7 @@ const ExerciseDisplay: React.FC = () => {
     useEffect(() => {axiosClient.get('/exercise',)
         .then(({data}) => {
             console.log(data);
-            setExercises(data);
+            setExercises(data.exercises);
         })
         .catch(error =>{
             const response = error.response;

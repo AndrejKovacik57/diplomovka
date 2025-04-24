@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('course_enrollments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->string('uid')->unique();
+            $table->string('uid');
             $table->unique(['course_id', 'uid']);
             $table->timestamps();
         });

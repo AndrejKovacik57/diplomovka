@@ -10,18 +10,20 @@ import axiosClient from "../axios-client.tsx";
 
 export default function DefaultLayout() {
 
-    const {setUser,token} = useStateContext()
+    const {setUser,token, setToken} = useStateContext()
 
     useEffect(() => {
         if (!token) return;
 
         axiosClient.get('/user')
             .then(({ data }) => {
-                console.log(data);
                 setUser(data);
             })
             .catch(error => {
                 console.log(error.response);
+                if (error.response.status === 401) {
+                    setToken(null);
+                }
             });
     }, [token]); // Dependency on token to conditionally run logic
 

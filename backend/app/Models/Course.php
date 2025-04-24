@@ -31,8 +31,5 @@ class Course extends Model
     {
         return $this->hasMany(CourseEnrollment::class);
     }
-    public function linkedUsers(): \Illuminate\Database\Eloquent\Collection
-    {
-        return User::query()->whereIn('uid', $this->enrollments()->pluck('uid'))->get();
-    }
+
 }

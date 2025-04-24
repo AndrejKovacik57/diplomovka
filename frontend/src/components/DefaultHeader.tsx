@@ -34,10 +34,16 @@ const Header = () => {
                         <Link to="/create" className="nav-item">Create exercise</Link>
                     </li>
                     <li>
+                        <Link to="/course" className="nav-item">Create course</Link>
+                    </li>
+                    <li>
                         <Link to="/display" className="nav-item">Display exercise</Link>
                     </li>
                     <li>
                         <Link to="/solution" className="nav-item">Display solution</Link>
+                    </li>
+                    <li>
+                        <Link to="/displayCourse" className="nav-item">Display courses</Link>
                     </li>
                     <li>
                         <Link to="/settings" className="nav-item">Settings</Link>

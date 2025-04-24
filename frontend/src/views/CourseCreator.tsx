@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import axiosClient from "../axios-client.tsx";
 
 const CourseCreator: React.FC = () => {
     const [nameFieldValue, setNameFieldValue] = useState("");
@@ -39,7 +40,20 @@ const CourseCreator: React.FC = () => {
 
         // Example: Send formData to API
         console.log("Submitting:", { nameFieldValue, semester, year, uploadedCSVFiles });
-        // axios.post('/api/courses', formData)
+        axiosClient.post('/course', formData,{
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+            .then(({data}) => {
+                console.log(data)
+            })
+            .catch(error =>{
+                const response = error.response;
+                if(response && response.status === 422){
+                    console.log(response.data.errors);
+                }
+            })
     };
 
     return (
