@@ -9,6 +9,8 @@ import GuestLayout from "./components/GuestLayout.tsx";
 import SolutionDisplay from "./views/SolutionDisplay.tsx";
 import GoogleCallBack from "./views/GoogleCallBack.tsx";
 import UserSettings from "./views/UserSettings.tsx";
+import CourseCreator from "./views/CourseCreator.tsx";
+import DisplayCourse from "./views/DisplayCourse.tsx";
 
 const router = createBrowserRouter([
     {
@@ -30,6 +32,14 @@ const router = createBrowserRouter([
             {
                 path: '/settings',
                 element: <UserSettings/>
+            },
+            {
+                path: '/course',
+                element: <CourseCreator/>
+            },
+            {
+                path: '/displayCourse',
+                element: <DisplayCourse/>
             },
             {
                 path: '/',
