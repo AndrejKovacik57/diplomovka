@@ -1,8 +1,6 @@
 import {createBrowserRouter, Navigate} from "react-router-dom";
-import ExerciseCreator from "./views/ExerciseCreator.tsx";
 import Login from "./views/Login.tsx";
 import Signup from "./views/Signup.tsx";
-import ExerciseDisplay from "./views/ExerciseDisplay.tsx";
 import NotFound from "./views/NotFound.tsx";
 import DefaultLayout from "./components/DefaultLayout.tsx";
 import GuestLayout from "./components/GuestLayout.tsx";
@@ -11,6 +9,8 @@ import GoogleCallBack from "./views/GoogleCallBack.tsx";
 import UserSettings from "./views/UserSettings.tsx";
 import CourseCreator from "./views/CourseCreator.tsx";
 import DisplayCourse from "./views/DisplayCourse.tsx";
+import ExerciseManager from "./views/ExerciseManager.tsx";
+import CourseManager from "./views/CourseManager.tsx";
 
 const router = createBrowserRouter([
     {
@@ -18,12 +18,12 @@ const router = createBrowserRouter([
         element: <DefaultLayout />,
         children: [
             {
-                path: '/create',
-                element: <ExerciseCreator />
+                path: '/exerciseManager',
+                element: <ExerciseManager />
             },
             {
-                path: '/display',
-                element: <ExerciseDisplay />
+                path: '/courseManager',
+                element: <CourseManager />
             },
             {
                 path: '/solution',
@@ -43,7 +43,7 @@ const router = createBrowserRouter([
             },
             {
                 path: '/',
-                element: <Navigate to ='/create'/>
+                element: <ExerciseManager/>
             }
         ]
     },

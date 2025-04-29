@@ -19,6 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('solution', SolutionController::class);
     Route::apiResource('course', CourseController::class);
     Route::post('course/{course}/exercise/{exercise}', [CourseController::class, 'addExercise']);
+    Route::post('course/exercise/updateDates', [CourseController::class, 'updateDatesCourseExercise']);
+    Route::get('user/getExercises', [\App\Http\Controllers\UserController::class, 'userExercises']);
 
 
     Route::post('aislog', [AuthControllerThirdParty::class, 'AISLogin']);

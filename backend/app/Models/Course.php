@@ -19,10 +19,6 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class);
     }
-    public function exercises(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(Exercise::class);
-    }
     public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Solutions::class);
@@ -30,6 +26,11 @@ class Course extends Model
     public function enrollments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(CourseEnrollment::class);
+    }
+    public function exercises(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Exercise::class, 'course_exercise')
+            ->withPivot('id' ,'start', 'end');
     }
 
 }

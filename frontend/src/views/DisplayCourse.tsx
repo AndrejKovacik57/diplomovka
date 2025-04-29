@@ -7,7 +7,9 @@ const CourseDisplay: React.FC = () => {
     const [courseDetails, setCourseDetails] = useState<{
         description: string;
         uids: { uid: string; enrolled: boolean }[];
+        exercises: { id: number; title: string; description: string; start_datetime: string; end_datetime: string;}[];
     } | null>(null);
+
     const [exercises, setExercises] = useState<{ id: number; title: string; description: string }[]>([]);
     const [selectedExerciseId, setSelectedExerciseId] = useState<number | null>(null);
     const [exerciseMessage, setExerciseMessage] = useState<string | null>(null);
@@ -48,7 +50,8 @@ const CourseDisplay: React.FC = () => {
                 console.log("Course Details:", data);
                 setCourseDetails({
                     description: data.course.description,  // assuming course has a description field
-                    uids: data.uids
+                    uids: data.uids,
+                    exercises: data.exercises
                 });
             })
             .catch(error => {
@@ -73,6 +76,49 @@ const CourseDisplay: React.FC = () => {
                     console.log(response.data.errors);
                 }
             });
+    };
+    const handleDatetimeChange = (
+        exerciseId: number,
+        field: 'start_datetime' | 'end_datetime',
+        value: string
+    ) => {
+        if (!courseDetails) return;
+
+        const updatedExercises = courseDetails.exercises.map(ex => {
+            if (ex.id === exerciseId) {
+                return {
+                    ...ex,
+                    [field]: value
+                };
+            }
+            return ex;
+        });
+
+        setCourseDetails({ ...courseDetails, exercises: updatedExercises });
+    };
+    const handleUpdateExerciseDates = async (exerciseId: number) => {
+        if (!courseDetails) return;
+
+        const exercise = courseDetails.exercises.find(ex => ex.id === exerciseId);
+        if (!exercise) return;
+
+        try {
+            const response = await axiosClient.post('/course/exercise/updateDates', {
+                id: exerciseId,
+                start: exercise.start_datetime,
+                end: exercise.end_datetime,
+            });
+
+            console.log(response.data.message);
+            setExerciseMessage(`Exercise ${exerciseId} updated successfully.`);
+        } catch (error: any) {
+            const response = error.response;
+            if (response && response.status === 422) {
+                console.log(response.data.errors);
+            } else {
+                console.error("Error updating exercise:", error);
+            }
+        }
     };
 
     return (
@@ -102,45 +148,97 @@ const CourseDisplay: React.FC = () => {
                 </form>
                 {courseDetails && (
                     <div className="course-details">
-                        <strong>Course Description:</strong> {courseDetails.description}
-                        <div className="user-list">
+                        <div className="item-list">
                             <h4>Users:</h4>
-                            <ul>
+                            <div className="item-list-grid">
+                                <div className="item-list-header">
+                                    <span><strong>UID</strong></span>
+                                    <span><strong>In Course</strong></span>
+                                </div>
                                 {courseDetails.uids.map(user => (
-                                    <li key={user.uid}>
-                                        UID: {user.uid} - {user.enrolled ? "🟢" : "🔴"}
-                                    </li>
+                                    <div className="item-list-row" key={user.uid}>
+                                        <span>{user.uid}</span>
+                                        <span>{user.enrolled ? "🟢" : "🔴"}</span>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         </div>
+                    </div>
+                )}
+                {courseDetails && courseDetails.exercises.length > 0 && (
+                    <div className="course-details">
+                        <div className="item-list">
+                            <h4>Exercises:</h4>
+                            <div className="item-list-grid">
+                                <div className="item-list-header">
+                                    <span><strong>Exercise</strong></span>
+                                    <span><strong>Start</strong></span>
+                                    <span><strong>End</strong></span>
+                                    <span><strong></strong></span>
+                                </div>
+                                {courseDetails.exercises.map(ex => (
+                                    <div className="item-list-row" key={ex.id}>
+                                        <span>{ex.id} - {ex.title}</span>
+                                        <span>
+                                            <input
+                                                type="datetime-local"
+                                                value={ex.start_datetime?.slice(0, 16) || ""}
+                                                onChange={(e) =>
+                                                    handleDatetimeChange(ex.id, "start_datetime", e.target.value)
+                                                }
+                                            />
+                                        </span>
+                                        <span>
+                                            <input
+                                                type="datetime-local"
+                                                value={ex.end_datetime?.slice(0, 16) || ""}
+                                                onChange={(e) =>
+                                                    handleDatetimeChange(ex.id, "end_datetime", e.target.value)
+                                                }
+                                            />
+                                        </span>
+                                        <span>
+                                            <button
+                                                className="btn btn-sm btn-outline-primary"
+                                                onClick={() => handleUpdateExerciseDates(ex.id)}
+                                                type="button"
+                                            >
+                                                Save
+                                            </button>
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
-                        {/* New Exercise Selection Form */}
-                        <form onSubmit={handleExerciseSubmit}>
-                            <div className="form-group">
-                                <label htmlFor="exercise">Select an Exercise:</label>
-                                <select
-                                    id="exercise"
-                                    className="form-control"
-                                    onChange={(e) => setSelectedExerciseId(Number(e.target.value))}
-                                    required
-                                >
-                                    <option value="">-- Select Exercise --</option>
-                                    {exercises.map((exercise) => (
-                                        <option key={exercise.id} value={exercise.id}>
-                                            {exercise.title}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <button type="submit" className="btn-primary">Submit Exercise</button>
-                            </div>
-                        </form>
-                        {exerciseMessage && (
-                            <div style={{ color: 'green', marginTop: '10px' }}>
-                                {exerciseMessage}
-                            </div>
-                        )}
+                {courseDetails && (
+                    <form onSubmit={handleExerciseSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="exercise">Add an Exercise:</label>
+                            <select
+                                id="exercise"
+                                className="form-control"
+                                onChange={(e) => setSelectedExerciseId(Number(e.target.value))}
+                                required
+                            >
+                                <option value="">-- Add Exercise --</option>
+                                {exercises.map((exercise) => (
+                                    <option key={exercise.id} value={exercise.id}>
+                                        {exercise.id + " " + exercise.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <button type="submit" className="btn-primary">Submit Exercise</button>
+                        </div>
+                    </form>
+                )}
+                {exerciseMessage && (
+                    <div style={{ color: 'green', marginTop: '10px' }}>
+                        {exerciseMessage}
                     </div>
                 )}
             </div>

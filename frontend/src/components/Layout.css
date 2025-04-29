@@ -13,6 +13,17 @@ html, body, #root, #defaultLayout, #guestLayout {
     height: 100vh;
 }
 
+.container {
+    display: flex;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f3f4f6;
+    flex-grow: 1
+}
+
+
 h1{
     font-size: 2.5rem;
 }
@@ -97,3 +108,5 @@ nav ul  li{
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+

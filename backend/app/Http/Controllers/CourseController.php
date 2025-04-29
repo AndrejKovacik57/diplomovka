@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\CourseEnrollment;
 use App\Models\Exercise;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -116,9 +117,21 @@ class CourseController extends Controller
             ];
         }, $allUids);
 
+        // Load exercises with pivot data
+        $exercises = $course->exercises()->get()->map(function ($exercise) {
+            return [
+                'id' => $exercise->pivot->id,
+                'title' => $exercise->title,
+                'description' => $exercise->description,
+                'start_datetime' => $exercise->pivot->start,
+                'end_datetime' => $exercise->pivot->end,
+            ];
+        });
+
         return response()->json([
             'course' => $course,
-            'uids' => $uidList
+            'uids' => $uidList,
+            'exercises' => $exercises
         ]);
     }
 
@@ -156,4 +169,39 @@ class CourseController extends Controller
 
         return response()->json(['message' => 'Exercise added to course successfully!'], 200);
     }
+
+    public function updateDatesCourseExercise(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'id' => 'required|integer',
+                'start' => 'nullable|date',
+                'end' => 'nullable|date|after_or_equal:start',
+            ]);
+
+            DB::beginTransaction();
+
+            $updated = DB::table('course_exercise')
+                ->where('id', $validated['id'])
+                ->update([
+                    'start' => $validated['start'],
+                    'end' => $validated['end'],
+                    'updated_at' => now(),
+                ]);
+
+            if (!$updated) {
+                DB::rollBack();
+                return response()->json(['message' => 'Course exercise not found or no changes made.'], 404);
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Dates updated successfully.']);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 }

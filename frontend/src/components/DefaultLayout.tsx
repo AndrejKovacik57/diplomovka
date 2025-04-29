@@ -6,17 +6,19 @@ import "./Layout.css";
 import "./DefaultLayout.css";
 import {useEffect} from "react";
 import axiosClient from "../axios-client.tsx";
+import StudentHeader from "./StudentHeader.tsx";
 
 
 export default function DefaultLayout() {
 
-    const {setUser,token, setToken} = useStateContext()
+    const {user,setUser,token, setToken} = useStateContext()
 
     useEffect(() => {
         if (!token) return;
 
         axiosClient.get('/user')
             .then(({ data }) => {
+                console.log(data)
                 setUser(data);
             })
             .catch(error => {
@@ -32,9 +34,10 @@ export default function DefaultLayout() {
     }
 
 
+
     return(
         <div id="defaultLayout">
-            <Header/>
+            {user?.employee_type === "teacher" ? <Header /> : <StudentHeader />}
             <div className="content">
                 <Outlet/>
             </div>

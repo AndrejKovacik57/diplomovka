@@ -19,11 +19,10 @@ return new class extends Migration
             $table->string('uid')->nullable()->unique();
             $table->integer('uisid')->nullable()->unique();
             $table->string('stuba_email')->nullable()->unique();
-            $table->string('employee_type')->nullable();
+            $table->enum('employee_type', ['student', 'teacher'])->default('teacher');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('google_id')->nullable();
             $table->string('password')->nullable();
-            $table->boolean('is_teacher')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
