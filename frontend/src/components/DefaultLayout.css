@@ -51,14 +51,16 @@
     width: 70%;
 }
 
-.form-group{
+.course-choose,.form-group{
     width: 100%;
     margin: 2rem;
     display: flex;
     flex-direction: column;
 }
+.course-choose label,
 .form-group label{
-
+    display: block;
+    font-weight: bold;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
@@ -95,6 +97,7 @@
     object-fit: contain;
 }
 
+#course-select,
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -185,4 +188,5 @@
     padding: 4px 0;
     border-bottom: 1px solid #eee;
 }
+
 

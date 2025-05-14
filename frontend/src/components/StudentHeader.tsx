@@ -6,7 +6,7 @@ import axiosClient from "../axios-client.tsx";
 
 
 
-const Header = () => {
+const StudentHeader = () => {
 
     const {user,token,setUser,setToken} = useStateContext();
     console.log(user);
@@ -24,11 +24,12 @@ const Header = () => {
 
     return (
         <header className="header-shadow">
-            <h1 className="app-name">MyApp</h1>
+
+            <Link to="/" className="nav-item"><h1>Home</h1></Link>
             <nav>
                 <ul className="">
                     <li>
-                        <Link to="/settings" className="nav-item">Home</Link>
+                        <Link to="/studentExercises" className="nav-item">Exercises</Link>
                     </li>
                     <li>
                         <Link to="/settings" className="nav-item">Settings</Link>
@@ -45,4 +46,4 @@ const Header = () => {
     );
 };
 
-export default Header;
+export default StudentHeader;

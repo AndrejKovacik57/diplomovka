@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -168,10 +169,12 @@ class ExerciseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Exercise $exercise): array
+    public function destroy(Exercise $exercise): JsonResponse
     {
         $exercise->delete();
 
-        return ['message' => 'Exercise deleted'];
+        return response()->json(['message' => 'Exercise deleted']);
     }
+
+
 }

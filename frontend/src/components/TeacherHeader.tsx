@@ -1,4 +1,3 @@
-// components/GuestHeader.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 import {useStateContext} from "../contexts/ContextProvider.tsx";
@@ -6,9 +5,11 @@ import axiosClient from "../axios-client.tsx";
 
 
 
-const Header = () => {
+const TeacherHeader = () => {
 
-    const {user,setUser,setToken} = useStateContext();
+    const {user,token,setUser,setToken} = useStateContext();
+    console.log(user);
+    console.log(token);
 
     const onLogout = (ev: React.MouseEvent<HTMLButtonElement>) => {
         ev.preventDefault()
@@ -22,18 +23,11 @@ const Header = () => {
 
     return (
         <header className="header-shadow">
-            <h1 className="app-name">MyApp</h1>
+            <Link to="/settings" className="nav-item"><h1>Home</h1></Link>
             <nav>
                 <ul className="">
-                    <li>
-                        <Link to="/" className="nav-item">Home</Link>
-                    </li>
-                    <li>
-                        <Link to="/exerciseManager" className="nav-item">Exercise</Link>
-                    </li>
-                    <li>
-                        <Link to="/courseManager" className="nav-item">Course</Link>
-                    </li>
+                    <li><Link to="/exerciseManager" className="nav-item">Exercise</Link></li>
+                    <li><Link to="/courseManager" className="nav-item">Course</Link></li>
                 </ul>
             </nav>
             <div className="user-info">
@@ -46,4 +40,5 @@ const Header = () => {
     );
 };
 
-export default Header;
+
+export default TeacherHeader;

@@ -1,20 +1,184 @@
-import React, {useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import axiosClient from "../axios-client.tsx";
+import { useStateContext } from "../contexts/ContextProvider.tsx";
+
+interface Exercise {
+    id: number;
+    title: string;
+    description: string;
+    pivot: {
+        start: string;
+        end: string;
+    };
+}
+
+interface Course {
+    id: number;
+    name: string;
+    semester: string;
+    year: number;
+    exercises: Exercise[];
+}
+
+const formatDuration = (start: string, end: string): string => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffMs = endDate.getTime() - startDate.getTime();
+
+    const totalMinutes = Math.floor(diffMs / (1000 * 60));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+
+    let result = "";
+    if (days > 0) result += `${days} day${days > 1 ? 's' : ''} `;
+    if (hours > 0 || days > 0) result += `${hours} hour${hours !== 1 ? 's' : ''} `;
+    result += `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+
+    return result.trim();
+};
 
 
-const StudentExercises: React.FC = () => {
+const StudentsExercises: React.FC = () => {
+    const { user } = useStateContext();
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+
+    const [mode, setMode] = useState<'active' | 'ended'>('active');
+
     useEffect(() => {
-        axiosClient.get('/user/getExercises')
-            .then(({data}) => {
-                console.log(data)
-            })
-            .catch(error => {
-                console.log(error.response);
-            });
-    }); // Dependency on token to conditionally run logic
+        if (user) {
+            axiosClient.get('user/courses/exercises')
+                .then(({ data }) => {
+                    setCourses(data.courses || []);
+                })
+                .catch(error => {
+                    console.error('Error fetching courses with exercises:', error);
+                });
+        }
+    }, [user]);
+
+    const selectedCourse = courses.find(course => course.id === selectedCourseId);
+
+    const getSortedAndCategorizedExercises = () => {
+        if (!selectedCourse) return { active: [], ended: [] };
+
+        const now = new Date();
+
+        const active = selectedCourse.exercises
+            .filter(e => new Date(e.pivot.end) > now)
+            .sort((a, b) => new Date(a.pivot.start).getTime() - new Date(b.pivot.start).getTime());
+
+        const ended = selectedCourse.exercises
+            .filter(e => new Date(e.pivot.end) <= now);
+
+        return { active, ended };
+    };
+
+    const { active, ended } = getSortedAndCategorizedExercises();
+
+    const openExercise = (exerciseId: number) => {
+        // Replace with actual navigation or modal logic
+        console.log("Opening exercise", exerciseId);
+        // e.g., navigate(`/exercises/${exerciseId}`);
+    };
+
 
     return (
-        <div></div>
-    )
-}
-export default StudentExercises;
+        <div className="container">
+            <div className="user-box">
+                <h1>Your Courses & Exercises</h1>
+                {courses.length === 0 ? (
+                    <p>No courses found.</p>
+                ) : (
+                    <>
+                        <div className={"course-choose"}>
+                            <label htmlFor="course-select">Select a course:</label>
+                            <select
+                                id="course-select"
+                                value={selectedCourseId ?? ""}
+                                onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+                            >
+                                <option value="" disabled>Select a course</option>
+                                {courses.map(course => (
+                                    <option key={course.id} value={course.id}>
+                                        {course.name} ({course.semester} {course.year})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+
+                        {selectedCourse && (
+
+                            <div className="course-exercises">
+                                <div className="toggle-container">
+                                    <div className={`toggle-slider ${mode === 'ended' ? 'right' : 'left'}`} />
+
+                                    <div
+                                        className={`toggle-option`}
+                                        onClick={() => setMode('active')}
+                                    >
+                                        Active
+                                    </div>
+                                    <div
+                                        className={`toggle-option`}
+                                        onClick={() => setMode('ended')}
+                                    >
+                                        Ended
+                                    </div>
+                                </div>
+
+                                <div className="item-list">
+                                    <h3>{mode === 'active' ? '🟢 Active Exercises' : '🔴 Ended Exercises'}</h3>
+                                    {(mode === 'active' ? active : ended).length === 0 ? (
+                                        <p>No {mode} exercises.</p>
+                                    ) : (
+                                        <div className="item-list-grid">
+                                            <div className="item-list-header">
+                                                <span><strong>Title</strong></span>
+                                                <span><strong>Start</strong></span>
+                                                <span><strong>End</strong></span>
+                                                <span><strong>Duration</strong></span>
+                                                <span></span>
+                                            </div>
+                                            {(mode === 'active' ? active : ended).map(exercise => {
+                                                const hasStarted = new Date(exercise.pivot.start) <= new Date();
+
+                                                return (
+                                                    <div className="item-list-row" key={exercise.id}>
+                                                        <span>{exercise.title}</span>
+                                                        <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
+                                                        <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
+                                                        <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
+                                                        {mode === 'active' ? (
+                                                            <span>
+                                                                <button
+                                                                    onClick={() => openExercise(exercise.id)}
+                                                                    disabled={!hasStarted}
+                                                                >
+                                                                    Open
+                                                                </button>
+                                                            </span>
+                                                        ) : <span />} {/* Empty column for ended */}
+                                                    </div>
+                                                );
+                                            })}
+
+
+
+                                        </div>
+                                    )}
+                                </div>
+
+
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default StudentsExercises;

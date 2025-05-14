@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthControllerThirdParty;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\SolutionController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TestsController;
 use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Route;
@@ -14,14 +15,9 @@ use Illuminate\Http\Request;
 // Protected Routes (Only authenticated users can access)
 Route::middleware('auth:sanctum')->group(function () {
     // API Resources (Restricted to authenticated users)
-    Route::apiResource('exercise', ExerciseController::class);
     Route::apiResource('test', TestsController::class);
     Route::apiResource('solution', SolutionController::class);
-    Route::apiResource('course', CourseController::class);
-    Route::post('course/{course}/exercise/{exercise}', [CourseController::class, 'addExercise']);
-    Route::post('course/exercise/updateDates', [CourseController::class, 'updateDatesCourseExercise']);
-    Route::get('user/getExercises', [\App\Http\Controllers\UserController::class, 'userExercises']);
-
+    Route::get('user/courses/exercises', [StudentController::class, 'getUsersCourseExercises']);
 
     Route::post('aislog', [AuthControllerThirdParty::class, 'AISLogin']);
 
@@ -32,6 +28,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', function (Request $request) {
         return $request->user();
     });
+});
+
+// Teacher-only routes
+Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
+    Route::apiResource('course', CourseController::class);
+    Route::apiResource('exercise', ExerciseController::class);
+    Route::post('course/{course}/exercise/{exercise}', [CourseController::class, 'addExercise']);
+    Route::post('course/exercise/updateDates', [CourseController::class, 'updateDatesCourseExercise']);
+    Route::get('user/getExercises', [\App\Http\Controllers\UserController::class, 'userExercises']);
 });
 
 // Public Routes (Auth-related)

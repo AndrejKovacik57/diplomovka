@@ -4,30 +4,14 @@ import {useStateContext} from "../contexts/ContextProvider.tsx";
 import Header from "./DefaultHeader.tsx";
 import "./Layout.css";
 import "./DefaultLayout.css";
-import {useEffect} from "react";
-import axiosClient from "../axios-client.tsx";
 import StudentHeader from "./StudentHeader.tsx";
 
 
 export default function DefaultLayout() {
 
-    const {user,setUser,token, setToken} = useStateContext()
+    const {user,token} = useStateContext()
 
-    useEffect(() => {
-        if (!token) return;
-
-        axiosClient.get('/user')
-            .then(({ data }) => {
-                console.log(data)
-                setUser(data);
-            })
-            .catch(error => {
-                console.log(error.response);
-                if (error.response.status === 401) {
-                    setToken(null);
-                }
-            });
-    }, [token]); // Dependency on token to conditionally run logic
+    console.log("Rendering DefaultLayout");
 
     if (!token){
         return <Navigate to={"/login"}/>
@@ -39,7 +23,7 @@ export default function DefaultLayout() {
         <div id="defaultLayout">
             {user?.employee_type === "teacher" ? <Header /> : <StudentHeader />}
             <div className="content">
-                <Outlet/>
+                    <Outlet />
             </div>
         </div>
     )

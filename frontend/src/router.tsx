@@ -1,78 +1,68 @@
-import {createBrowserRouter, Navigate} from "react-router-dom";
-import Login from "./views/Login.tsx";
-import Signup from "./views/Signup.tsx";
-import NotFound from "./views/NotFound.tsx";
-import DefaultLayout from "./components/DefaultLayout.tsx";
-import GuestLayout from "./components/GuestLayout.tsx";
-import SolutionDisplay from "./views/SolutionDisplay.tsx";
-import GoogleCallBack from "./views/GoogleCallBack.tsx";
-import UserSettings from "./views/UserSettings.tsx";
-import CourseCreator from "./views/CourseCreator.tsx";
-import DisplayCourse from "./views/DisplayCourse.tsx";
-import ExerciseManager from "./views/ExerciseManager.tsx";
-import CourseManager from "./views/CourseManager.tsx";
+// router.tsx
+import {
+    createBrowserRouter,
+    Navigate,
+    RouterProvider,
+} from "react-router-dom";
+import { useStateContext } from "./contexts/ContextProvider";
+import DefaultLayout from "./components/DefaultLayout";
+import GuestLayout from "./components/GuestLayout";
+import NotFound from "./views/NotFound";
+import Login from "./views/Login";
+import Signup from "./views/Signup";
+import GoogleCallBack from "./views/GoogleCallBack";
+import SolutionDisplay from "./views/SolutionDisplay";
+import UserSettings from "./views/UserSettings";
+import CourseCreator from "./views/CourseCreator";
+import DisplayCourse from "./views/DisplayCourse";
+import ExerciseManager from "./views/ExerciseManager";
+import CourseManager from "./views/CourseManager";
+import StudentExercises from "./views/StudentExercises.tsx";
+import Home from "./views/Home.tsx";
 
-const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <DefaultLayout />,
-        children: [
-            {
-                path: '/exerciseManager',
-                element: <ExerciseManager />
-            },
-            {
-                path: '/courseManager',
-                element: <CourseManager />
-            },
-            {
-                path: '/solution',
-                element: <SolutionDisplay />
-            },
-            {
-                path: '/settings',
-                element: <UserSettings/>
-            },
-            {
-                path: '/course',
-                element: <CourseCreator/>
-            },
-            {
-                path: '/displayCourse',
-                element: <DisplayCourse/>
-            },
-            {
-                path: '/',
-                element: <ExerciseManager/>
-            }
-        ]
-    },
-    {
-        path: '/',
-        element: <GuestLayout />,
-        children: [
-            {
-                path: '/login', // Relative path (no leading '/')
-                element: <Login />
-            },
-            {
-                path: '/signup',
-                element: <Signup />
-            },
-            {
-                path: '/',
-                element: <Navigate to ='/login'/>
-            },
-            {
-                path:'/auth/google',
-                element: <GoogleCallBack />
-            }
-        ]
-    },
-    {
-        path: '*',
-        element: <NotFound />
-    }
-]);
+function AppRouter() {
+    const { user } = useStateContext();
+    console.log("AppRouter: user =", user);
+    const teacherRoutes = [
+        { path: 'exerciseManager', element: <ExerciseManager /> },
+        { path: 'courseManager', element: <CourseManager /> },
+        { path: '/', element: <Home/> },
+    ];
 
-export default router;
+    const studentRoutes = [
+        { path: 'solution', element: <SolutionDisplay /> },
+        { path: 'settings', element: <UserSettings /> },
+        { path: 'studentExercises', element: <StudentExercises /> },
+        { path: '/', element: <Home/> },
+    ];
+
+    const commonRoutes = [
+        { path: 'course', element: <CourseCreator /> },
+        { path: 'displayCourse', element: <DisplayCourse /> },
+    ];
+
+    const isAuthenticated = !!user;
+
+    const router = createBrowserRouter([
+        {
+            path: '/',
+            element: isAuthenticated ? <DefaultLayout /> : <GuestLayout />,
+            children: isAuthenticated
+                ? (user.employee_type === 'teacher'
+                    ? [...teacherRoutes, ...commonRoutes]
+                    : [...studentRoutes, ...commonRoutes])
+                : [
+                    { path: 'login', element: <Login /> },
+                    { path: 'signup', element: <Signup /> },
+                    { path: 'auth/google', element: <GoogleCallBack /> },
+                    { path: '/', element: <Navigate to="/login" /> },
+                    { path: '*', element: <NotFound /> },
+                ],
+        }
+
+    ]);
+
+    return <RouterProvider router={router} />;
+}
+
+export default AppRouter;

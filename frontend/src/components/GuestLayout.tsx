@@ -6,7 +6,7 @@ import "./GuestLayout.css";
 
 export default function GuestLayout() {
     const {token} = useStateContext()
-
+    console.log("Rendering GuestLayout");
     if (token){
         return <Navigate to={"/"}/>
     }
