@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
+use App\Models\Exercise;
 use App\Models\User;
+use App\Services\ExerciseAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class StudentController extends Controller
 {
@@ -35,5 +40,47 @@ class StudentController extends Controller
         }
         return response()->json(['courses' => $result]);
 
+    }
+
+    public function getUserExercise(Request $request, $courseId, $exerciseId): JsonResponse
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        // Check if user is in the course
+        $isUserInCourse = $user->courses()->where('courses.id', $courseId)->exists();
+        if (!$isUserInCourse) {
+            return response()->json(['message' => 'User not enrolled in course'], 403);
+        }
+
+        // Check if the course has the exercise
+        $course = Course::with(['exercises' => function ($query) use ($exerciseId) {
+            $query->where('exercises.id', $exerciseId);
+        }])->find($courseId);
+
+        if (!$course) {
+            return response()->json(['message' => 'Course does not exist'], 404);
+        }
+
+        $exercise = $course->exercises->firstWhere('id', $exerciseId);
+
+        if (!$exercise) {
+            return response()->json(['message' => 'Exercise does not exist'], 404);
+        }
+
+        // Check if exercise is within start and end window
+        $now = Carbon::now();
+        $start = $exercise->pivot->start;
+        $end = $exercise->pivot->end;
+
+        // Check time window
+        if (($start && $now->lt($start)) || ($end && $now->gt($end))) {
+            return response()->json(['message' => 'Exercise is not currently available'], 403);
+        }
+
+
+        $service = new ExerciseAccessService();
+        $result = $service->getExerciseWithFiles($exerciseId);
+        return response()->json($result);
     }
 }

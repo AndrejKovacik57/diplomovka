@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosClient from "../axios-client.tsx";
 import { useStateContext } from "../contexts/ContextProvider.tsx";
+import { useNavigate } from "react-router-dom";
 
 interface Exercise {
     id: number;
@@ -43,7 +44,7 @@ const StudentsExercises: React.FC = () => {
     const { user } = useStateContext();
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
-
+    const navigate = useNavigate();
     const [mode, setMode] = useState<'active' | 'ended'>('active');
 
     useEffect(() => {
@@ -77,10 +78,8 @@ const StudentsExercises: React.FC = () => {
 
     const { active, ended } = getSortedAndCategorizedExercises();
 
-    const openExercise = (exerciseId: number) => {
-        // Replace with actual navigation or modal logic
-        console.log("Opening exercise", exerciseId);
-        // e.g., navigate(`/exercises/${exerciseId}`);
+    const openExercise = (exerciseId: number, courseId: number) => {
+        navigate(`/course/${courseId}/exercise/${exerciseId}`);
     };
 
 
@@ -154,7 +153,7 @@ const StudentsExercises: React.FC = () => {
                                                         {mode === 'active' ? (
                                                             <span>
                                                                 <button
-                                                                    onClick={() => openExercise(exercise.id)}
+                                                                    onClick={() => openExercise(exercise.id, selectedCourse.id)}
                                                                     disabled={!hasStarted}
                                                                 >
                                                                     Open

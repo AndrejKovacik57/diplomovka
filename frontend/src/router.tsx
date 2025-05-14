@@ -19,6 +19,8 @@ import ExerciseManager from "./views/ExerciseManager";
 import CourseManager from "./views/CourseManager";
 import StudentExercises from "./views/StudentExercises.tsx";
 import Home from "./views/Home.tsx";
+import StudentExerciseDisplay from "./views/StudentExerciseDisplay.tsx";
+import Forbidden from "./views/Forbidden.tsx";
 
 function AppRouter() {
     const { user } = useStateContext();
@@ -33,6 +35,7 @@ function AppRouter() {
         { path: 'solution', element: <SolutionDisplay /> },
         { path: 'settings', element: <UserSettings /> },
         { path: 'studentExercises', element: <StudentExercises /> },
+        { path: 'course/:courseId/exercise/:exerciseId',element: <StudentExerciseDisplay />},
         { path: '/', element: <Home/> },
     ];
 
@@ -48,19 +51,24 @@ function AppRouter() {
             path: '/',
             element: isAuthenticated ? <DefaultLayout /> : <GuestLayout />,
             children: isAuthenticated
-                ? (user.employee_type === 'teacher'
-                    ? [...teacherRoutes, ...commonRoutes]
-                    : [...studentRoutes, ...commonRoutes])
+                ? [
+                    ...(user.employee_type === 'teacher'
+                        ? [...teacherRoutes, ...commonRoutes]
+                        : [...studentRoutes, ...commonRoutes]),
+                    { path: '403', element: <Forbidden /> },
+                    { path: '*', element: <NotFound /> },
+                ]
                 : [
                     { path: 'login', element: <Login /> },
                     { path: 'signup', element: <Signup /> },
                     { path: 'auth/google', element: <GoogleCallBack /> },
                     { path: '/', element: <Navigate to="/login" /> },
+                    { path: '403', element: <Forbidden /> },
                     { path: '*', element: <NotFound /> },
                 ],
-        }
-
+        },
     ]);
+
 
     return <RouterProvider router={router} />;
 }
