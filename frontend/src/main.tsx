@@ -5,10 +5,12 @@ import './index.css';
 import AppRouter from './router'; // <-- no longer a `router` object
 import { ContextProvider } from './contexts/StateContext';
 
-createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-        <ContextProvider>
-            <AppRouter />
-        </ContextProvider>
-    </StrictMode>
-);
+if (!window.location.pathname.startsWith('/pgadmin')) {
+    createRoot(document.getElementById('root')!).render(
+        <StrictMode>
+            <ContextProvider>
+                <AppRouter />
+            </ContextProvider>
+        </StrictMode>
+    );
+}
