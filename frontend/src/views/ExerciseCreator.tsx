@@ -77,18 +77,6 @@ const ExerciseCreator: React.FC = () => {
                 console.log(response.data.errors);
             }
         })
-        // debugging
-        axiosClient.get('/test',)
-        .then(({data}) => {
-            console.log('test')
-            console.log(data)
-        })
-        .catch(error =>{
-            const response = error.response;
-            if(response && response.status === 422){
-                console.log(response.data.errors);
-            }
-        })
     };
 
     return (

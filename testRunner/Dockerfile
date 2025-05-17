@@ -16,7 +16,6 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 RUN useradd -m student
 USER student
 
-# Verify installations (optional)
 RUN php -v && node -v && npm -v
 
 CMD ["php", "solution.php"]

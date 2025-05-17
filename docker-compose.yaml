@@ -73,6 +73,9 @@ services:
       - db
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - docker-network
+
   test-runner:
     build:
       context: testRunner
@@ -80,8 +83,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-    networks:
-      - "none"
+    network_mode: "none"
     volumes:
       - ./backend/storage/app:/tests
 
