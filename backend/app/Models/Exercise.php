@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Exercise extends Model
 {
@@ -17,15 +18,15 @@ class Exercise extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(images::class);
+        return $this->hasMany(Images::class);
     }
     public function files(): HasMany
     {
-        return $this->hasMany(files::class);
+        return $this->hasMany(Files::class);
     }
-    public function tests(): HasMany
+    public function test(): HasOne
     {
-        return $this->hasMany(Tests::class);
+        return $this->hasOne(Tests::class);
     }
 
     public function courses(): BelongsToMany

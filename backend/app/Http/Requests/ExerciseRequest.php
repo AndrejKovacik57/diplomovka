@@ -28,8 +28,7 @@ class ExerciseRequest extends FormRequest
             'images.*' => 'file|mimes:jpg,jpeg,png,gif|max:10240', // Set a reasonable max size
             'codeFiles' => 'nullable|array',
             'codeFiles.*' => 'file|max:10240',
-            'testFiles' => 'nullable|array',
-            'testFiles.*' => 'file|max:10240'
+            'testFile' => 'nullable|file|max:10240',
         ];
     }
 }

@@ -6,7 +6,8 @@ const ExerciseCreator: React.FC = () => {
     const [titleFieldValue, setTitleFieldValue] = useState("");
     const [uploadedImage, setUploadedImage] = useState<File []>([]);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
-    const [uploadedTestFiles, setUploadedTestFiles] = useState<File[]>([]);
+    const [uploadedTestFile, setUploadedTestFile] = useState<File | null>(null);
+
 
     // Refs for file inputs
     const imageInputRef = useRef<HTMLInputElement>(null);
@@ -33,11 +34,12 @@ const ExerciseCreator: React.FC = () => {
         }
     };
 
-    const handleTestFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setUploadedTestFiles(Array.from(e.target.files));
+    const handleTestFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setUploadedTestFile(e.target.files[0]); // Only store one file
         }
     };
+
 
 
     const handleSubmit = (event: React.FormEvent) => {
@@ -56,12 +58,9 @@ const ExerciseCreator: React.FC = () => {
             console.log(file.name, file.type);
             formData.append('codeFiles[]', file); // Use 'files[]' to send as an array
         });
-        uploadedTestFiles.forEach((file) => {
-            console.log(file.name, file.type);
-            formData.append('testFiles[]', file); // Use 'files[]' to send as an array
-        });
-
-
+        if (uploadedTestFile) {
+            formData.append('testFile', uploadedTestFile); // Use singular key
+        }
 
         console.log("formData: ", formData)
         axiosClient.post('/exercise', formData,{
@@ -171,16 +170,14 @@ const ExerciseCreator: React.FC = () => {
                                 className="input-field-file"
                                 type="file"
                                 accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                                multiple
-                                onChange={handleTestFilesUpload}
+                                onChange={handleTestFileUpload}
                             />
-                            {uploadedTestFiles.length > 0 && (
+                            {uploadedTestFile && (
                                 <ul>
-                                    {uploadedTestFiles.map((file, index) => (
-                                        <li key={index}>{file.name}</li>
-                                    ))}
+                                    <li>{uploadedTestFile.name}</li>
                                 </ul>
                             )}
+
                         </div>
 
                     </div>

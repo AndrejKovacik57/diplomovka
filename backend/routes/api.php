@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthControllerThirdParty;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\SolutionController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\TestsController;
 use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -15,12 +14,9 @@ use Illuminate\Http\Request;
 // Protected Routes (Only authenticated users can access)
 Route::middleware('auth:sanctum')->group(function () {
     // API Resources (Restricted to authenticated users)
-    Route::apiResource('test', TestsController::class);
     Route::apiResource('solution', SolutionController::class);
     Route::get('user/courses/exercises', [StudentController::class, 'getUsersCourseExercises']);
     Route::get('user/course/{courseId}/exercise/{exerciseId}', [StudentController::class, 'getUserExercise']);
-
-
 
     Route::post('aislog', [AuthControllerThirdParty::class, 'AISLogin']);
 

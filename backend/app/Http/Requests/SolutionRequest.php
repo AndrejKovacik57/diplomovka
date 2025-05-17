@@ -23,8 +23,9 @@ class SolutionRequest extends FormRequest
     {
         return [
             'exerciseId' => 'required|integer',
-            'codeFiles' => 'nullable|array',
-            'codeFiles.*' => 'file|max:10240'
+            'courseId' => 'required|integer',
+            'codeFile' => 'required|file|max:10240',
         ];
     }
+
 }

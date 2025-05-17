@@ -67,24 +67,22 @@ class ExerciseController extends Controller
                 }
 
             }
-            if ($request->has('testFiles')) {
-                foreach ($fields['testFiles'] as $file) {
-                    $name= $file->getClientOriginalName();
-                    $extension = $file->getClientOriginalExtension();
-                    $filePath = $file->store('testFiles', 'local');
-                    $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
-                    $finalPath = $noExtensionFilePath . '.' . $extension;
+            if ($request->hasFile('testFile')) {
+                $file = $request->file('testFile');
+                $name = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $filePath = $file->store('testFiles', 'local');
+                $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
+                $finalPath = $noExtensionFilePath . '.' . $extension;
 
-                    // Rename the file to include the extension
-                    Storage::disk('local')->move($filePath, $finalPath);
+                Storage::disk('local')->move($filePath, $finalPath);
 
-                    $exercise->Tests()->create([
-                        'file_path' => $finalPath,
-                        'file_name' => $name
-                    ]);
-                }
-
+                $exercise->test()->create([
+                    'file_path' => $finalPath,
+                    'file_name' => $name
+                ]);
             }
+
 
 
 

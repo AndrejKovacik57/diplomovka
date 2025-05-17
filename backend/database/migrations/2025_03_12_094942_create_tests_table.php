@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('exercise_id');
+            $table->unsignedBigInteger('exercise_id')->unique();
             $table->string('file_path');
             $table->string('file_name');
             $table->timestamps();

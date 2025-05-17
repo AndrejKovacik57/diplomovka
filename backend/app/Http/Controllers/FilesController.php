@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\files;
+use App\Models\Files;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
@@ -31,7 +31,7 @@ class FilesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(files $files)
+    public function show(Files $files)
     {
         //
     }
@@ -39,7 +39,7 @@ class FilesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, files $files)
+    public function update(Request $request, Files $files)
     {
         //
     }
@@ -47,7 +47,7 @@ class FilesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(files $files)
+    public function destroy(Files $files)
     {
         //
     }

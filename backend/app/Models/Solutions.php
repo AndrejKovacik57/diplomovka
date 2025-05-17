@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Solutions extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'course_exercise_id',
         'user_id',

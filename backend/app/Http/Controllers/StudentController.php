@@ -16,21 +16,23 @@ class StudentController extends Controller
 {
     public function getUsersCourseExercises(): JsonResponse
     {
-        /** @var User $user */
         $user = Auth::user();
+        \assert($user instanceof User);
 
-        $courses = $user->courses()->with('exercises')->get();
+        $courses = $user->courses()->with('courseExercises.exercise')->get();
         $result = [];
 
         foreach ($courses as $course) {
             $courseData = $course->toArray();
             $courseData['exercises'] = [];
 
-            foreach ($course->exercises as $exercise) {
+            foreach ($course->courseExercises as $courseExercise) {
+                $exercise = $courseExercise->exercise;
                 $exerciseData = $exercise->toArray();
+
                 $exerciseData['pivot'] = [
-                    'start' => $exercise->pivot->start,
-                    'end' => $exercise->pivot->end,
+                    'start' => $courseExercise->start,
+                    'end' => $courseExercise->end,
                 ];
 
                 $courseData['exercises'][] = $exerciseData;
@@ -38,14 +40,14 @@ class StudentController extends Controller
 
             $result[] = $courseData;
         }
-        return response()->json(['courses' => $result]);
 
+        return response()->json(['courses' => $result]);
     }
 
     public function getUserExercise(Request $request, $courseId, $exerciseId): JsonResponse
     {
-        /** @var User $user */
         $user = auth()->user();
+        \assert($user instanceof User);
 
         // Check if user is in the course
         $isUserInCourse = $user->courses()->where('courses.id', $courseId)->exists();

@@ -7,7 +7,8 @@ const StudentExerciseDisplay = () => {
     const { courseId, exerciseId } = useParams();
     const { user } = useStateContext();
     const [exerciseDetails, setExerciseDetails] = useState<{ exercise: { title: string; description: string }; images: { id: number; file_name: string; file_data: string }[]; files: { id: number; file_name: string; file_data: string }[] } | null>(null);
-    const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
+    const [uploadedCodeFile, setUploadedCodeFile] = useState<File | null>(null);
+
     const solutionInputRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
         if (user) {
@@ -27,20 +28,21 @@ const StudentExerciseDisplay = () => {
     }, [user, courseId, exerciseId]); // Include dependencies
 
 
-    const handleCodeFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setUploadedCodeFiles(Array.from(e.target.files));
+    const handleCodeFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setUploadedCodeFile(e.target.files[0]);
         }
     };
+
     const handleSubmitSolution = async (event: React.FormEvent) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append('exerciseId', `${exerciseId}`);
 
-        uploadedCodeFiles.forEach((file) => {
-            console.log(file.name, file.type);
-            formData.append('codeFiles[]', file); // Use 'files[]' to send as an array
-        });
+        if (uploadedCodeFile) {
+            formData.append('codeFile', uploadedCodeFile); // singular
+        }
+
 
         axiosClient.post('/solution', formData,{
             headers: {
@@ -103,16 +105,15 @@ const StudentExerciseDisplay = () => {
                                         className="input-field-file"
                                         type="file"
                                         accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                                        multiple
-                                        onChange={handleCodeFilesUpload}
+                                        onChange={handleCodeFileUpload}
+
                                     />
-                                    {uploadedCodeFiles.length > 0 && (
+                                    {uploadedCodeFile && (
                                         <ul>
-                                            {uploadedCodeFiles.map((file) => (
-                                                <li key={`${file.name}-${file.lastModified}`}>{file.name}</li>
-                                            ))}
+                                            <li>{uploadedCodeFile.name}</li>
                                         </ul>
                                     )}
+
                                 </div>
                                 <div className="form-group">
                                     <button className="btn-primary">Submit</button>

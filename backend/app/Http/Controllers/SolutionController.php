@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SolutionRequest;
-use App\Models\Exercise;
+use App\Jobs\RunSolutionTests;
+use App\Models\CourseExercise;
 use App\Models\Solutions;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,17 +21,9 @@ class SolutionController extends Controller
     public function index()
     {
         $user = Auth::user();
+        \assert($user instanceof User);
 
-        Log::info('User in /solution route: ', [$user]);
-        Log::info('User ID: ' . optional($user)->id);
-
-        if (!$user) {
-            return response()->json(['error' => 'Not authenticated'], 401);
-        }
-
-        $solutions = $user->solutions;
-
-        Log::info('Solutions count: ' . $solutions->count());
+        $solutions = $user->solutions()->with('courseExercise.course', 'courseExercise.exercise')->get();
 
         return response()->json($solutions);
     }
@@ -37,40 +31,60 @@ class SolutionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SolutionRequest $request)
+    public function store(SolutionRequest $request): JsonResponse
     {
 
-
-        Log::info('test solution log1 ' . Auth::id());
         $fields = $request->validated();
-        $exerciseID = $fields['exerciseId'];
-        $exercise = Exercise::with(['tests'])->findOrFail($exerciseID);
+        $courseId = $fields['courseId'];
+        $exerciseId = $fields['exerciseId'];
+        $userId = Auth::id();
+
+        // Find the CourseExercise row for the course + exercise pair
+        $courseExercise = CourseExercise::query()
+            ->where('course_id', $courseId)
+            ->where('exercise_id', $exerciseId)
+            ->firstOrFail();
 
         DB::beginTransaction();
         try {
-            if ($request->has('codeFiles')) {
-                foreach ($fields['codeFiles'] as $file) {
-                    $name= $file->getClientOriginalName();
-                    $extension = $file->getClientOriginalExtension();
-                    $filePath = $file->store('solutions', 'local');
-                    $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
-                    $finalPath = $noExtensionFilePath . '.' . $extension;
+            $oldSolution = Solutions::query()
+                ->where('user_id', $userId)
+                ->where('course_exercise_id', $courseExercise->id)
+                ->first();
 
-                    Storage::disk('local')->move($filePath, $finalPath);
-
-                    $solution = $exercise->solutions()->create([
-                        'file_path' => $finalPath,
-                        'file_name' => $name,
-                        'user_id' => Auth::id()
-                    ]);
-                }
-
+            if ($oldSolution) {
+                Storage::disk('local')->delete($oldSolution->file_path);
+                $oldSolution->delete();
             }
+            Solutions::query()
+                ->where('user_id', $userId)
+                ->where('course_exercise_id', $courseExercise->id)
+                ->delete();
+
+            // Process the uploaded file
+            $file = $fields['codeFile'];
+            $name = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $filePath = $file->store('solutions', 'local');
+            $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
+            $finalPath = $noExtensionFilePath . '.' . $extension;
+
+            Storage::disk('local')->move($filePath, $finalPath);
+
+            $solution = Solutions::query()->create([
+                'course_exercise_id' => $courseExercise->id,
+                'file_path' => $finalPath,
+                'file_name' => $name,
+                'user_id' => $userId,
+            ]);
+            dispatch(new RunSolutionTests($solution));
+
+
             DB::commit();
-            return response()->json(['solutions' => $solution]);
+            return response()->json(['solution' => $solution], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to create exercise'. $e], 500);
+            return response()->json(['error' => 'Failed to create exercise'. $e->getMessage()], 500);
         }
     }
 

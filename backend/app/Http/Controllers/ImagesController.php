@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreimagesRequest;
 use App\Http\Requests\UpdateimagesRequest;
-use App\Models\images;
+use App\Models\Images;
 
 class ImagesController extends Controller
 {
@@ -27,7 +27,7 @@ class ImagesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(images $images)
+    public function show(Images $images)
     {
         //
     }
@@ -35,7 +35,7 @@ class ImagesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateimagesRequest $request, images $images)
+    public function update(UpdateimagesRequest $request, Images $images)
     {
         //
     }
@@ -43,7 +43,7 @@ class ImagesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(images $images)
+    public function destroy(Images $images)
     {
         //
     }
