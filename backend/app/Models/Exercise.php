@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exercise extends Model
 {
@@ -13,27 +15,27 @@ class Exercise extends Model
         'description'
     ];
 
-    public function images(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function images(): HasMany
     {
         return $this->hasMany(images::class);
     }
-    public function files(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function files(): HasMany
     {
         return $this->hasMany(files::class);
     }
-    public function tests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function tests(): HasMany
     {
         return $this->hasMany(Tests::class);
     }
 
-    public function courses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_exercise');
     }
 
-    public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function courseExercises(): HasMany
     {
-        return $this->hasMany(Solutions::class);
+        return $this->hasMany(CourseExercise::class);
     }
 
 

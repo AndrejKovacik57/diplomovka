@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Course extends Model
 {
@@ -15,19 +17,19 @@ class Course extends Model
     ];
 
 
-    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
-    public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Solutions::class);
-    }
-    public function enrollments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function enrollments(): HasMany
     {
         return $this->hasMany(CourseEnrollment::class);
     }
-    public function exercises(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function courseExercises(): HasMany
+    {
+        return $this->hasMany(CourseExercise::class);
+    }
+    public function exercises(): BelongsToMany
     {
         return $this->belongsToMany(Exercise::class, 'course_exercise')
             ->withPivot('id' ,'start', 'end');

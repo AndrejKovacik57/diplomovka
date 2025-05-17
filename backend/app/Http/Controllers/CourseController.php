@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
+use App\Models\CourseExercise;
 use App\Models\Exercise;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class CourseController extends Controller
 {
@@ -181,18 +183,22 @@ class CourseController extends Controller
 
             DB::beginTransaction();
 
-            $updated = DB::table('course_exercise')
-                ->where('id', $validated['id'])
-                ->update([
-                    'start' => $validated['start'],
-                    'end' => $validated['end'],
-                    'updated_at' => now(),
-                ]);
+            $courseExercise = CourseExercise::query()->findOrFail($validated['id']);
 
-            if (!$updated) {
+            if (!$courseExercise) {
                 DB::rollBack();
-                return response()->json(['message' => 'Course exercise not found or no changes made.'], 404);
+                return response()->json(['message' => 'Course exercise not found.'], 404);
             }
+
+            $courseExercise->start = $validated['start'];
+            $courseExercise->end = $validated['end'];
+
+            if (!$courseExercise->isDirty()) {
+                DB::rollBack();
+                return response()->json(['message' => 'No changes detected.'], 400);
+            }
+
+            $courseExercise->save();
 
             DB::commit();
             return response()->json(['message' => 'Dates updated successfully.']);

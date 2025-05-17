@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -54,15 +56,14 @@ class User extends Authenticatable
         ];
     }
 
-    public function courses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class);
     }
-    public function solutions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function solutions(): HasMany
     {
         return $this->hasMany(Solutions::class);
     }
-
 
     public function hasSubmittedSolution($courseId, $exerciseId): bool
     {
