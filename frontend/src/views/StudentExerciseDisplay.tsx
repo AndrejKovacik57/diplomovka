@@ -38,6 +38,7 @@ const StudentExerciseDisplay = () => {
         event.preventDefault();
         const formData = new FormData();
         formData.append('exerciseId', `${exerciseId}`);
+        formData.append('courseId', `${courseId}`);
 
         if (uploadedCodeFile) {
             formData.append('codeFile', uploadedCodeFile); // singular

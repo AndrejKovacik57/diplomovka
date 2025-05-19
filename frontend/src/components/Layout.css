@@ -15,12 +15,11 @@ html, body, #root, #defaultLayout, #guestLayout {
 
 .container {
     display: flex;
-
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     background-color: #f3f4f6;
-    flex-grow: 1
+    flex-grow: 1;
+    padding-top: 2rem;
 }
 
 
@@ -130,3 +129,28 @@ nav ul  li{
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+.solution-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.solution-title h4,
+.solution-title p {
+    margin: 0; /* remove default margins */
+}
+.solution-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f9f9f9;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 0.5rem;
+    column-gap: 1rem;
+}
+

@@ -85,4 +85,79 @@ class StudentController extends Controller
         $result = $service->getExerciseWithFiles($exerciseId);
         return response()->json($result);
     }
+
+    public function getUserSolutions(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        \assert($user instanceof \App\Models\User);
+
+        $courses = $user->courses()->with(['exercises'])->get();
+
+        $response = [];
+
+        foreach ($courses as $course) {
+            $courseData = [
+                'id' => $course->id,
+                'name' => $course->name,
+                'exercises' => [],
+            ];
+
+            foreach ($course->exercises as $exercise) {
+                // Get the CourseExercise instance
+                $courseExercise = $course->courseExercises()
+                    ->where('exercise_id', $exercise->id)
+                    ->first();
+
+                if (!$courseExercise) {
+                    continue;
+                }
+
+                // Get the user's solutions from CourseExercise
+                $solutions = $courseExercise->solutions()
+                    ->where('user_id', $user->id)
+                    ->with('testResults')
+                    ->get();
+
+                if ($solutions->isEmpty()) {
+                    continue;
+                }
+
+                $exerciseData = [
+                    'id' => $exercise->id,
+                    'title' => $exercise->title,
+                    'description' => $exercise->description,
+                    'solutions' => [],
+                ];
+
+                foreach ($solutions as $solution) {
+                    $exerciseData['solutions'][] = [
+                        'id' => $solution->id,
+                        'file_name' => $solution->file_name,
+                        'test_status' => $solution->test_status,
+                        'test_output' => $solution->test_output,
+                        'submitted_at' => $solution->submitted_at,
+                        'test_results' => $solution->testResults->map(function ($result) {
+                            return [
+                                'id' => $result->id,
+                                'test_name' => $result->test_name,
+                                'status' => $result->status,
+                                'message' => $result->message,
+                            ];
+                        }),
+                    ];
+                }
+
+                $courseData['exercises'][] = $exerciseData;
+            }
+
+            // Only add the course if it has at least one exercise with solutions
+            if (!empty($courseData['exercises'])) {
+                $response[] = $courseData;
+            }
+        }
+
+
+        return response()->json($response);
+    }
+
 }

@@ -62,7 +62,7 @@ class User extends Authenticatable
     }
     public function solutions(): HasMany
     {
-        return $this->hasMany(Solutions::class);
+        return $this->hasMany(Solution::class);
     }
 
     public function hasSubmittedSolution($courseId, $exerciseId): bool

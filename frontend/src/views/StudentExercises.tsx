@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosClient from "../axios-client.tsx";
 import { useStateContext } from "../contexts/ContextProvider.tsx";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../components/Spinner.tsx";
 
 interface Exercise {
     id: number;
@@ -46,14 +47,18 @@ const StudentsExercises: React.FC = () => {
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const navigate = useNavigate();
     const [mode, setMode] = useState<'active' | 'ended'>('active');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (user) {
+            setLoading(true);
             axiosClient.get('user/courses/exercises')
                 .then(({ data }) => {
                     setCourses(data.courses || []);
+                    setLoading(false);
                 })
                 .catch(error => {
+                    setLoading(false);
                     console.error('Error fetching courses with exercises:', error);
                 });
         }
@@ -62,27 +67,40 @@ const StudentsExercises: React.FC = () => {
     const selectedCourse = courses.find(course => course.id === selectedCourseId);
 
     const getSortedAndCategorizedExercises = () => {
-        if (!selectedCourse) return { active: [], ended: [] };
+        if (!selectedCourse) return { active: [], upcoming: [], ended: [] };
 
         const now = new Date();
 
+        const upcoming = selectedCourse.exercises
+            .filter(e => new Date(e.pivot.start) > now)
+            .sort((a, b) => new Date(a.pivot.start).getTime() - new Date(b.pivot.start).getTime());
+
         const active = selectedCourse.exercises
-            .filter(e => new Date(e.pivot.end) > now)
+            .filter(e => new Date(e.pivot.start) <= now && new Date(e.pivot.end) > now)
             .sort((a, b) => new Date(a.pivot.start).getTime() - new Date(b.pivot.start).getTime());
 
         const ended = selectedCourse.exercises
             .filter(e => new Date(e.pivot.end) <= now);
 
-        return { active, ended };
+        return { active, upcoming, ended };
     };
 
-    const { active, ended } = getSortedAndCategorizedExercises();
+
+    const { active, upcoming, ended } = getSortedAndCategorizedExercises();
 
     const openExercise = (exerciseId: number, courseId: number) => {
         navigate(`/course/${courseId}/exercise/${exerciseId}`);
     };
 
-
+    if (loading) {
+        return (
+            <div className="container">
+                <div className="user-box">
+                    <Spinner/>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="container">
             <div className="user-box">
@@ -118,7 +136,7 @@ const StudentsExercises: React.FC = () => {
                                         className={`toggle-option`}
                                         onClick={() => setMode('active')}
                                     >
-                                        Active
+                                        Active/Upcoming
                                     </div>
                                     <div
                                         className={`toggle-option`}
@@ -129,45 +147,105 @@ const StudentsExercises: React.FC = () => {
                                 </div>
 
                                 <div className="item-list">
-                                    <h3>{mode === 'active' ? '🟢 Active Exercises' : '🔴 Ended Exercises'}</h3>
-                                    {(mode === 'active' ? active : ended).length === 0 ? (
-                                        <p>No {mode} exercises.</p>
-                                    ) : (
-                                        <div className="item-list-grid">
-                                            <div className="item-list-header">
-                                                <span><strong>Title</strong></span>
-                                                <span><strong>Start</strong></span>
-                                                <span><strong>End</strong></span>
-                                                <span><strong>Duration</strong></span>
-                                                <span></span>
-                                            </div>
-                                            {(mode === 'active' ? active : ended).map(exercise => {
-                                                const hasStarted = new Date(exercise.pivot.start) <= new Date();
-
-                                                return (
-                                                    <div className="item-list-row" key={exercise.id}>
-                                                        <span>{exercise.title}</span>
-                                                        <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
-                                                        <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
-                                                        <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
-                                                        {mode === 'active' ? (
-                                                            <span>
+                                    {mode === 'active' ? (
+                                        <>
+                                            {/* 🟢 Active Exercises */}
+                                            <div className="item-list">
+                                                <h3>🟢 Active Exercises</h3>
+                                                {active.length === 0 ? (
+                                                    <p>No active exercises.</p>
+                                                ) : (
+                                                    <div className="item-list-grid">
+                                                        <div className="item-list-header">
+                                                            <span><strong>Title</strong></span>
+                                                            <span><strong>Start</strong></span>
+                                                            <span><strong>End</strong></span>
+                                                            <span><strong>Duration</strong></span>
+                                                            <span></span>
+                                                        </div>
+                                                        {active.map(exercise => (
+                                                            <div className="item-list-row" key={exercise.id}>
+                                                                <span>{exercise.title}</span>
+                                                                <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
+                                                                <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
+                                                                <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
+                                                                <span>
                                                                 <button
                                                                     onClick={() => openExercise(exercise.id, selectedCourse.id)}
-                                                                    disabled={!hasStarted}
                                                                 >
                                                                     Open
                                                                 </button>
                                                             </span>
-                                                        ) : <span />} {/* Empty column for ended */}
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                );
-                                            })}
+                                                )}
+                                            </div>
 
-
-
+                                            {/* 🟠 Upcoming Exercises */}
+                                            <div className="item-list">
+                                                <h3>🟠 Upcoming Exercises</h3>
+                                                {upcoming.length === 0 ? (
+                                                    <p>No upcoming exercises.</p>
+                                                ) : (
+                                                    <div className="item-list-grid">
+                                                        <div className="item-list-header">
+                                                            <span><strong>Title</strong></span>
+                                                            <span><strong>Start</strong></span>
+                                                            <span><strong>End</strong></span>
+                                                            <span><strong>Duration</strong></span>
+                                                            <span></span>
+                                                        </div>
+                                                        {upcoming.map(exercise => (
+                                                            <div className="item-list-row" key={exercise.id}>
+                                                                <span>{exercise.title}</span>
+                                                                <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
+                                                                <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
+                                                                <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
+                                                                <span>
+                                                                <button
+                                                                    disabled
+                                                                    title="Exercise not yet started"
+                                                                >
+                                                                    Open
+                                                                </button>
+                                                            </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        // 🔴 Ended Exercises
+                                        <div className="item-list">
+                                            <h3>🔴 Ended Exercises</h3>
+                                            {ended.length === 0 ? (
+                                                <p>No ended exercises.</p>
+                                            ) : (
+                                                <div className="item-list-grid">
+                                                    <div className="item-list-header">
+                                                        <span><strong>Title</strong></span>
+                                                        <span><strong>Start</strong></span>
+                                                        <span><strong>End</strong></span>
+                                                        <span><strong>Duration</strong></span>
+                                                        <span></span>
+                                                    </div>
+                                                    {ended.map(exercise => (
+                                                        <div className="item-list-row" key={exercise.id}>
+                                                            <span>{exercise.title}</span>
+                                                            <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
+                                                            <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
+                                                            <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
+                                                            <span></span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
+
+
                                 </div>
 
 

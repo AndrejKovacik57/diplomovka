@@ -29,7 +29,10 @@ const StudentHeader = () => {
             <nav>
                 <ul className="">
                     <li>
-                        <Link to="/studentExercises" className="nav-item">Exercises</Link>
+                        <Link to="/exercises" className="nav-item">Exercises</Link>
+                    </li>
+                    <li>
+                        <Link to="/solution" className="nav-item">Solutions</Link>
                     </li>
                     <li>
                         <Link to="/settings" className="nav-item">Settings</Link>

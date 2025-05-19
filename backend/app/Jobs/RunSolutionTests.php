@@ -3,7 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\Exercise;
-use App\Models\Solutions;
+use App\Models\Solution;
+use App\Models\SolutionTestResult;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -18,9 +19,9 @@ class RunSolutionTests implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public Solutions $solution;
+    public Solution $solution;
 
-    public function __construct(Solutions $solution)
+    public function __construct(Solution $solution)
     {
         $this->solution = $solution;
     }
@@ -31,55 +32,144 @@ class RunSolutionTests implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->solution->update(['test_status' => 'running']);
-        $exerciseID = $this->solution->courseExercise->exercise_id;
-        $exercise = Exercise::with(['tests'])->findOrFail($exerciseID);
+        Log::info("Starting test job for Solution ID: {$this->solution->id}");
+        $this->solution->test_status = Solution::STATUS_RUNNING;
+        $this->solution->save();
 
+        $exerciseID = $this->solution->courseExercise->exercise_id;
+        Log::info("Fetching Exercise with ID: $exerciseID");
+
+        $exercise = Exercise::with(['test', 'files'])->findOrFail($exerciseID);
         $solutionPath = $this->solution->file_path;
         $solutionName = $this->solution->file_name;
         $test = $exercise->test;
         $test_path = $test->file_path;
         $test_name = $test->file_name;
 
+        //  if exercises had other files then solution skeleton like json for example
+        foreach ($exercise->files as $file) {
+            if ($file->file_name != $solutionName){
+                $this->copyFile($file->file_name, $file->file_path);
+            }
+        }
+
+        Log::info("Copying solution file: $solutionPath as $solutionName");
         $this->copyFile($solutionName, $solutionPath);
-        $copiedTestPath = $this->copyFile($test_name, $test_path);
+
+        Log::info("Copying test file: $test_path as $test_name");
+        $test_file_path = $this->copyFile($test_name, $test_path);
 
         try {
             $ext = pathinfo($this->solution->file_path, PATHINFO_EXTENSION);
-            $cmd = match ($ext) {
-                'php' => 'php',
-                'js' => 'node',
+            Log::info("Detected extension: $ext");
+
+            $binary = match ($ext) {
+                'php' => '/usr/local/bin/php',
+                'js' => '/usr/local/bin/node',
                 default => throw new Exception("Unsupported extension: $ext"),
             };
 
+
+            Log::info("Running test with nsjail");
             $process = new Process([
-                'docker', 'compose', 'run', '--rm', '--network', 'none',
-                '--memory=128m', '--cpus=0.5',
-                'test-runner', 'timeout', '10s', $cmd, $copiedTestPath
+                'nsjail',
+                '--quiet',
+                '--mode', 'o',
+                '--chroot', '/sandbox',
+                '--time_limit', '5',
+                '--rlimit_as', '128',
+                '--disable_clone_newnet',
+                '--disable_proc',
+                '--', $binary, "/test/{$test_name}"
             ]);
 
+            $process->setTimeout(10);
             $process->run();
 
-            $output = $process->getOutput() . $process->getErrorOutput();
+            if (!$process->isSuccessful()) {
+                $erroutput = $process->getErrorOutput();
+                $output = $process->getOutput();
+                Log::error("Test failed with error: $erroutput, out: $output");
 
-            $this->solution->update([
-                'test_status' => 'finished',
-                'test_output' => $output,
-            ]);
+                $this->solution->test_status = Solution::STATUS_FAILED;
+                $this->solution->save();
+            } else {
+                $output = $process->getOutput();
+                $lines = explode("\n", trim($output));
+                $results = [
+                    'passed' => [],
+                    'failed' => [],
+                ];
+                foreach ($lines as $line) {
+                    if (preg_match('/^\[PASS\] (\w+)/', $line, $matches)) {
+                        $results['passed'][] = $matches[1];
+                    } elseif (preg_match('/^\[FAIL\] (\w+)/', $line, $matches)) {
+                        $results['failed'][] = $matches[1];
+                    }
+                }
+                $solutionId = $this->solution->id;
+                $this->createTestResult($results, 'passed', $solutionId);
+                $this->createTestResult($results, 'failed', $solutionId);
+
+                Log::info('Test results', $results);
+
+
+                Log::info("Test succeeded. Output: $output");
+                $this->solution->test_status = Solution::STATUS_FINISHED;
+                $this->solution->save();
+            }
+
+        } catch (Exception $e) {
+            Log::error("Test execution failed: " . $e->getMessage());
+            $this->solution->test_status = Solution::STATUS_FAILED;
+
+            $this->solution->save();
+
         } finally {
-            // Ensure cleanup happens even if the job fails
-            Storage::disk('local')->delete("tests/{$solutionName}");
-            Storage::disk('local')->delete("tests/{$test_name}");
+            $solutionFile = "/sandbox/test/{$solutionName}";
+            $testFile = "/sandbox/test/{$test_name}";
+
+            if (file_exists($solutionFile)) {
+                unlink($solutionFile);
+                Log::info("Deleted solution file: {$solutionFile}");
+            } else {
+                Log::warning("Solution file not found for deletion: {$solutionFile}");
+            }
+
+            if (file_exists($testFile)) {
+                unlink($testFile);
+                Log::info("Deleted test file: {$testFile}");
+            } else {
+                Log::warning("Test file not found for deletion: {$testFile}");
+            }
+
+            Log::info("Cleanup completed for test files: {$solutionName}, {$test_name}");
         }
+
     }
 
-    private function copyFile(string $newName, string $filePath):string{
-        $newPath = "tests/{$newName}";
-        // Copy the file from the original solution path to the new location
-        if (Storage::disk('local')->exists($filePath)) {
-            Storage::disk('local')->copy($filePath, $newPath);
+    protected function copyFile(string $newName, string $filePath): string {
+        $sourcePath = storage_path("app/private/{$filePath}");
+        $destinationPath = "/sandbox/test/{$newName}";
+
+        if (file_exists($sourcePath)) {
+            // Copy the file manually
+            copy($sourcePath, $destinationPath);
+            Log::info("Copied {$sourcePath} to {$destinationPath}");
+        } else {
+            Log::warning("Source file does not exist: {$sourcePath}");
         }
 
-        return "app/{$newPath}";
+        return $destinationPath;
+    }
+    protected function createTestResult(array $parsedResults, string $key, int $solutionId): void
+    {
+        foreach ($parsedResults[$key] as $testName) {
+            SolutionTestResult::query()->create([
+                'solution_id' => $solutionId,
+                'test_name' => $testName,
+                'status' => $key
+            ]);
+        }
     }
 }

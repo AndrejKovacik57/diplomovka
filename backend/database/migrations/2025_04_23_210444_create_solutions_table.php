@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unique(['course_exercise_id', 'user_id']);
             $table->string('file_path');
             $table->string('file_name');
-            $table->enum('test_status', ['pending', 'running', 'finished'])->default('pending');
+            $table->enum('test_status', ['pending', 'running', 'finished', 'failed'])->default('pending');
             $table->text('test_output')->nullable();
             $table->timestamp('submitted_at')->useCurrent();
 

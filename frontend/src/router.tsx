@@ -11,7 +11,6 @@ import NotFound from "./views/NotFound";
 import Login from "./views/Login";
 import Signup from "./views/Signup";
 import GoogleCallBack from "./views/GoogleCallBack";
-import SolutionDisplay from "./views/SolutionDisplay";
 import UserSettings from "./views/UserSettings";
 import CourseCreator from "./views/CourseCreator";
 import DisplayCourse from "./views/DisplayCourse";
@@ -21,6 +20,7 @@ import StudentExercises from "./views/StudentExercises.tsx";
 import Home from "./views/Home.tsx";
 import StudentExerciseDisplay from "./views/StudentExerciseDisplay.tsx";
 import Forbidden from "./views/Forbidden.tsx";
+import StudentSolutions from "./views/StudentSolutions.tsx";
 
 function AppRouter() {
     const { user } = useStateContext();
@@ -32,9 +32,10 @@ function AppRouter() {
     ];
 
     const studentRoutes = [
-        { path: 'solution', element: <SolutionDisplay /> },
+        { path: 'solution', element: <StudentSolutions /> },
         { path: 'settings', element: <UserSettings /> },
-        { path: 'studentExercises', element: <StudentExercises /> },
+        { path: 'exercises', element: <StudentExercises /> },
+        { path: 'course/:courseId/exercise/:exerciseId',element: <StudentExerciseDisplay />},
         { path: 'course/:courseId/exercise/:exerciseId',element: <StudentExerciseDisplay />},
         { path: '/', element: <Home/> },
     ];

@@ -11,6 +11,6 @@ class UserCourseExercise extends Model
 
     public function solutions()
     {
-        return $this->hasMany(Solutions::class);
+        return $this->hasMany(Solution::class);
     }
 }

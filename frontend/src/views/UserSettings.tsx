@@ -69,7 +69,7 @@ const UserSettings: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <button className="btn-primary">Submit</button>
+                        <button className="btn-primary">Link Account</button>
                     </div>
                 </form>
             </div>

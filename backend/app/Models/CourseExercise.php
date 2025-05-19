@@ -32,6 +32,6 @@ class CourseExercise extends Model
 
     public function solutions(): HasMany
     {
-        return $this->hasMany(Solutions::class);
+        return $this->hasMany(Solution::class);
     }
 }

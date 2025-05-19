@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SolutionRequest;
 use App\Jobs\RunSolutionTests;
 use App\Models\CourseExercise;
-use App\Models\Solutions;
+use App\Models\Solution;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -47,7 +47,7 @@ class SolutionController extends Controller
 
         DB::beginTransaction();
         try {
-            $oldSolution = Solutions::query()
+            $oldSolution = Solution::query()
                 ->where('user_id', $userId)
                 ->where('course_exercise_id', $courseExercise->id)
                 ->first();
@@ -56,7 +56,7 @@ class SolutionController extends Controller
                 Storage::disk('local')->delete($oldSolution->file_path);
                 $oldSolution->delete();
             }
-            Solutions::query()
+            Solution::query()
                 ->where('user_id', $userId)
                 ->where('course_exercise_id', $courseExercise->id)
                 ->delete();
@@ -71,7 +71,7 @@ class SolutionController extends Controller
 
             Storage::disk('local')->move($filePath, $finalPath);
 
-            $solution = Solutions::query()->create([
+            $solution = Solution::query()->create([
                 'course_exercise_id' => $courseExercise->id,
                 'file_path' => $finalPath,
                 'file_name' => $name,
@@ -91,7 +91,7 @@ class SolutionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Solutions $solution)
+    public function show(Solution $solution)
     {
         //
     }
@@ -99,7 +99,7 @@ class SolutionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SolutionRequest $request, Solutions $solution)
+    public function update(SolutionRequest $request, Solution $solution)
     {
         //
     }
@@ -107,7 +107,7 @@ class SolutionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Solutions $solution)
+    public function destroy(Solution $solution)
     {
         //
     }

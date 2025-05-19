@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
-import axiosClient from "../axios-client.tsx"; // adjust the path if needed
+import axiosClient from "../axios-client.tsx";
+import Spinner from "../components/Spinner.tsx"; // adjust the path if needed
 
 interface ContextProviderProps {
     children: ReactNode;
@@ -69,11 +70,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
 
     if (loading) {
         return (
-            <div className="layout-loading">
-                <div className="spinner-container">
-                    <div className="spinner" />
-                </div>
-            </div>
+            <Spinner/>
         );
     }
 
