@@ -81,7 +81,10 @@ class AuthControllerThirdParty extends Controller
             DB::commit();
 
             Log::info('test login8');
-            return response()->json(['user' => $user, 'token' => $token], 200);
+            return response()->json([
+                'user' => $user->only(['id', 'email', 'first_name', 'last_name', 'stuba_email', 'uid', 'uisid',
+                    'employee_type', 'google_id', 'email_verified_at', 'created_at', 'updated_at']),
+                'token' => $token], 200);
         }catch (\Exception $e) {
             DB::rollBack();
 
