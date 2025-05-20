@@ -112,12 +112,22 @@ class CourseController extends Controller
         Log::info('$allUids: ' . implode(', ', $allUids));
 
         // Build list with enrollment status
-        $uidList = array_map(function($uid) use ($uidEnrolled) {
+        $uidList = array_map(function($uid) use ($uidEnrolled, $course) {
+            $isEnrolled = in_array($uid, $uidEnrolled);
+            $user = $isEnrolled
+                ? $course->users()->where('uid', $uid)->first()
+                : null;
+
             return [
                 'uid' => $uid,
-                'enrolled' => in_array($uid, $uidEnrolled)
+                'enrolled' => $isEnrolled,
+                'user_id' => $user?->id,
+                'first_name' => $user?->first_name,
+                'last_name' => $user?->last_name,
             ];
         }, $allUids);
+
+
 
         // Load exercises with pivot data
         $exercises = $course->exercises()->get()->map(function ($exercise) {
@@ -131,6 +141,7 @@ class CourseController extends Controller
         });
 
         return response()->json([
+
             'course' => $course,
             'uids' => $uidList,
             'exercises' => $exercises
@@ -161,53 +172,5 @@ class CourseController extends Controller
         //
     }
 
-    public function addExercise(string $courseId, string $exerciseId): \Illuminate\Http\JsonResponse
-    {
-        $course = Course::query()->findOrFail($courseId);
-        $exercise = Exercise::query()->findOrFail($exerciseId);
-
-        // Attach without detaching existing ones
-        $course->exercises()->syncWithoutDetaching($exercise->id);
-
-        return response()->json(['message' => 'Exercise added to course successfully!'], 200);
-    }
-
-    public function updateDatesCourseExercise(Request $request): JsonResponse
-    {
-        try {
-            $validated = $request->validate([
-                'id' => 'required|integer',
-                'start' => 'nullable|date',
-                'end' => 'nullable|date|after_or_equal:start',
-            ]);
-
-            DB::beginTransaction();
-
-            $courseExercise = CourseExercise::query()->findOrFail($validated['id']);
-
-            if (!$courseExercise) {
-                DB::rollBack();
-                return response()->json(['message' => 'Course exercise not found.'], 404);
-            }
-
-            $courseExercise->start = $validated['start'];
-            $courseExercise->end = $validated['end'];
-
-            if (!$courseExercise->isDirty()) {
-                DB::rollBack();
-                return response()->json(['message' => 'No changes detected.'], 400);
-            }
-
-            $courseExercise->save();
-
-            DB::commit();
-            return response()->json(['message' => 'Dates updated successfully.']);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
-        }
-    }
 
 }

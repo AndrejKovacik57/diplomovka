@@ -110,12 +110,16 @@ class RunSolutionTests implements ShouldQueue
                 $solutionId = $this->solution->id;
                 $this->createTestResult($results, 'passed', $solutionId);
                 $this->createTestResult($results, 'failed', $solutionId);
+                $numOfSuccessful = count($results['passed']);
+                $numOfFailed = count($results['failed']);
+                $total = $numOfSuccessful + $numOfFailed;
 
                 Log::info('Test results', $results);
 
 
                 Log::info("Test succeeded. Output: $output");
                 $this->solution->test_status = Solution::STATUS_FINISHED;
+                $this->solution->test_output = "$numOfSuccessful/$total";
                 $this->solution->save();
             }
 

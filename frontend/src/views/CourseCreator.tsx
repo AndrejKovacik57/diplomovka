@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import axiosClient from "../axios-client.tsx";
+import {toast} from "react-toastify";
 
 const CourseCreator: React.FC = () => {
     const [nameFieldValue, setNameFieldValue] = useState("");
@@ -47,6 +48,7 @@ const CourseCreator: React.FC = () => {
         })
             .then(({data}) => {
                 console.log(data)
+                toast.success("Course created!");
             })
             .catch(error =>{
                 const response = error.response;

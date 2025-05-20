@@ -99,7 +99,7 @@ const StudentSolutions: React.FC = () => {
                                                     <div><strong>Status:</strong> {solution.test_status}</div>
                                                     <div><strong>Submitted At:</strong> {new Date(solution.submitted_at).toLocaleString()}</div>
                                                     <div>
-                                                        <strong>Message:</strong>
+                                                        <strong>Test result:</strong> {solution.test_output}
                                                     </div>
 
                                                 </div>
@@ -128,9 +128,6 @@ const StudentSolutions: React.FC = () => {
 
                                             </div>
                                         ))}
-
-                                        <hr/>
-
                                     </div>
                                 ))}
                             </div>

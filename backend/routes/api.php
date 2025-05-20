@@ -6,6 +6,7 @@ use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\SolutionController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -34,8 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
     Route::apiResource('course', CourseController::class);
     Route::apiResource('exercise', ExerciseController::class);
-    Route::post('course/{course}/exercise/{exercise}', [CourseController::class, 'addExercise']);
-    Route::post('course/exercise/updateDates', [CourseController::class, 'updateDatesCourseExercise']);
+    Route::post('course/{course}/exercise/{exercise}', [TeacherController::class, 'addExercise']);
+    Route::post('course/exercise/updateDates', [TeacherController::class, 'updateDatesCourseExercise']);
+    Route::get('course/{courseId}/user/{userId}/exercise/solutions', [TeacherController::class, 'getUserSolutions']);
     Route::get('user/getExercises', [\App\Http\Controllers\UserController::class, 'userExercises']);
 });
 

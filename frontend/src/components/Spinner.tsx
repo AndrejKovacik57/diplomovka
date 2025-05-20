@@ -1,5 +1,3 @@
-import "./Layout.css";
-import "./DefaultLayout.css";
 
 
 export default function Spinner() {

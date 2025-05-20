@@ -1,5 +1,6 @@
 import React, {useRef, useState} from "react";
 import axiosClient from "../axios-client.tsx";
+import { toast } from 'react-toastify';
 
 const ExerciseCreator: React.FC = () => {
     const [descriptionFieldValue, setDescriptionFieldValue] = useState("");
@@ -70,6 +71,8 @@ const ExerciseCreator: React.FC = () => {
         })
         .then(({data}) => {
             console.log(data)
+            console.log("API success, about to show toast");
+            toast.success("Exercise created!");
         })
         .catch(error =>{
             const response = error.response;
@@ -81,6 +84,7 @@ const ExerciseCreator: React.FC = () => {
 
     return (
         <div className="container">
+
             <div className="user-box">
                 <h2 className="form-title">Create Exercise</h2>
                 <form onSubmit={handleSubmit}>

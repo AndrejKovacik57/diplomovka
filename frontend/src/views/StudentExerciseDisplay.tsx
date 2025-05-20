@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import React, {useEffect, useRef, useState} from "react";
 import axiosClient from "../axios-client.tsx";
 import {useStateContext} from "../contexts/ContextProvider.tsx";
+import {toast} from "react-toastify";
 
 const StudentExerciseDisplay = () => {
     const { courseId, exerciseId } = useParams();
@@ -52,6 +53,7 @@ const StudentExerciseDisplay = () => {
         })
             .then(({data}) => {
                 console.log(data)
+                toast.success("Solution submitted!");
             })
             .catch(error =>{
                 const response = error.response;
