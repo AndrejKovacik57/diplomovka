@@ -11,7 +11,7 @@ export default function DefaultLayout() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen min-w-[400px]">
             {user?.employee_type === "teacher" ?
                 <ResponsiveHeader role="teacher" />
                 : <ResponsiveHeader role="student" />}

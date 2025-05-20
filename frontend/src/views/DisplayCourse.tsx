@@ -51,6 +51,9 @@ const CourseDisplay: React.FC = () => {
     const [exerciseMessage, setExerciseMessage] = useState<string | null>(null);
     const [exerciseErrorMessage, setErrorExerciseMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
 
     useEffect(() => {
         axiosClient.get("/exercise").then(({ data }) => {
@@ -204,31 +207,84 @@ const CourseDisplay: React.FC = () => {
                                 <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">In Course</div>
 
                                 {/* User Rows */}
-                                {courseDetails.uids.map((user, index) => (
-                                    <React.Fragment key={user.uid}>
-                                        <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            {user.user_id ? (
-                                                <button
-                                                    onClick={() => handleUserClick(user.user_id)}
-                                                    className="text-blue-600 underline hover:text-blue-800 text-left"
-                                                >
-                                                    {user.uid}
-                                                </button>
-                                            ) : (
-                                                <span>{user.uid}</span>
-                                            )}
-                                        </div>
-                                        <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            {user.first_name}
-                                        </div>
-                                        <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            {user.last_name}
-                                        </div>
-                                        <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                            {user.enrolled ? "🟢" : "🔴"}
-                                        </div>
-                                    </React.Fragment>
-                                ))}
+                                {courseDetails.uids
+                                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                                    .map((user, index) => {
+                                        const realIndex = (currentPage - 1) * itemsPerPage + index;
+                                        return (
+                                            <React.Fragment key={user.uid}>
+                                                <div className={`px-4 py-2 border-t border-gray-200 ${realIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                    {user.user_id ? (
+                                                        <button
+                                                            onClick={() => handleUserClick(user.user_id)}
+                                                            className="text-blue-600 underline hover:text-blue-800 text-left"
+                                                        >
+                                                            {user.uid}
+                                                        </button>
+                                                    ) : (
+                                                        <span>{user.uid}</span>
+                                                    )}
+                                                </div>
+                                                <div className={`px-4 py-2 border-t border-gray-200 ${realIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                    {user.first_name}
+                                                </div>
+                                                <div className={`px-4 py-2 border-t border-gray-200 ${realIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                    {user.last_name}
+                                                </div>
+                                                <div className={`px-4 py-2 border-t border-gray-200 ${realIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                    {user.enrolled ? "🟢" : "🔴"}
+                                                </div>
+                                            </React.Fragment>
+                                        );
+                                    })}
+
+
+                            </div>
+                            <div className="flex flex-wrap justify-between items-center mt-4 gap-4">
+                                {/* Page size selector on the left */}
+                                <div className="flex items-center space-x-2 mx-auto">
+                                    <label htmlFor="itemsPerPage" className="font-medium whitespace-nowrap">
+                                        Users per page:
+                                    </label>
+                                    <select
+                                        id="itemsPerPage"
+                                        value={itemsPerPage}
+                                        onChange={(e) => {
+                                            setItemsPerPage(Number(e.target.value));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border border-gray-300 rounded px-2 py-1"
+                                    >
+                                        {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((num) => (
+                                            <option key={num} value={num}>
+                                                {num}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Pagination controls in center */}
+                                <div className="flex items-center gap-2 mx-auto">
+                                    <button
+                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                                    >
+                                        Prev
+                                    </button>
+                                    <span className="px-2 py-1 whitespace-nowrap">Page {currentPage}</span>
+                                    <button
+                                        onClick={() =>
+                                            setCurrentPage((prev) =>
+                                                prev < Math.ceil(courseDetails.uids.length / itemsPerPage) ? prev + 1 : prev
+                                            )
+                                        }
+                                        disabled={currentPage >= Math.ceil(courseDetails.uids.length / itemsPerPage)}
+                                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -310,11 +366,11 @@ const CourseDisplay: React.FC = () => {
                 )}
 
                 {selectedUserId && (
-                    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 min-w-[400px]">
                         <div className="relative bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
                             {/* Sticky Header */}
                             <div className="sticky top-0 z-10 bg-white p-6 border-b border-gray-300">
-                                <div className="relative flex justify-center items-center">
+                                <div className="relative flex justify-center items-center ">
                                     {/* Inline Centered Name + UID */}
                                     <div className="flex gap-6">
                                         {selectedUserName && (
@@ -342,7 +398,7 @@ const CourseDisplay: React.FC = () => {
                                     userExercises.length > 0 ? (
                                         userExercises.map((exercise) =>
                                             exercise.solutions.map((solution: Solution) => (
-                                                <div key={solution.id} className="border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50">
+                                                <div key={solution.id} className="border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50 ">
                                                     <h4 className="font-bold mb-2">Solution for {exercise.title}</h4>
                                                     <div className="space-y-1">
                                                         <div className="flex flex-wrap gap-6">

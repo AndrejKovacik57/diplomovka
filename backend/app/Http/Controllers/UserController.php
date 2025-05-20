@@ -11,8 +11,8 @@ class UserController extends Controller
 {
     public function userExercises(Request $request): JsonResponse
     {
+        /** @var User $user */
         $user = Auth::user();
-        \assert($user instanceof User);
 
         $courses = $user->courses()->with('exercises')->get();
 

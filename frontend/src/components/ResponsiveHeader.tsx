@@ -32,7 +32,7 @@ const ResponsiveHeader = ({ role }: { role: "guest" | "student" | "teacher" }) =
     };
 
     return (
-        <header className={`shadow-md bg-white px-4 py-3 flex justify-between items-center`}>
+        <header className={`shadow-md bg-white px-4 py-3 flex justify-between items-center min-w-[400px]`}>
 
         <Link to="/" className="text-xl font-bold">MyApp</Link>
 

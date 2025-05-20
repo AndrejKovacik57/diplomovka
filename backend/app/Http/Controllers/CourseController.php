@@ -5,147 +5,63 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
-use App\Models\CourseExercise;
-use App\Models\Exercise;
 use App\Models\User;
+use App\Services\CourseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class CourseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): \Illuminate\Http\JsonResponse
-    {
-        $courses = Course::all();
 
-        return response()->json(['courses' => $courses], 200);
+    protected CourseService $courseService;
+
+    public function __construct(CourseService $courseService)
+    {
+        $this->courseService = $courseService;
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(): JsonResponse
     {
-        //
+        $courses = Course::all();
+
+        return response()->json(['courses' => $courses], ResponseAlias::HTTP_OK);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CourseRequest $request): \Illuminate\Http\JsonResponse
+    public function store(CourseRequest $request): JsonResponse
     {
-        Log::info('test log1 ' . Auth::id());
-        DB::beginTransaction();
         try {
 
-            Log::info('test log2');
             $fields = $request->validated();
-            Log::info('Validated Fields:', $fields);
-            $course = Course::query()->create([
-                'name' => $fields['name'],
-                'semester' => $fields['semester'],
-                'year' => $fields['year']
-            ]);
-            Log::info('test log3');
-
-            if ($request->has('csvFiles')) {
-                foreach ($request->file('csvFiles', []) as $csvFile) {
-                    if (($handle = fopen($csvFile->getRealPath(), 'r')) !== false) {
-                        $header = fgetcsv($handle); // Get header row
-
-                        while (($row = fgetcsv($handle)) !== false) {
-                            $uid = end($row);
-                            if (!$uid) {
-                                continue;
-                            }
-
-                            Log::info('test log4');
-                            Log::info('course_id '.$course->id);
-                            Log::info('uid '.$uid);
-                            $user = User::query()->where('uid', $uid)->first();
-                            if ($user) {
-                                $course->users()->attach($user->id);
-                            } else {
-                                CourseEnrollment::query()->create([
-                                    'course_id' => $course->id,
-                                    'uid' => $uid,
-                                ]);
-                            }
-
-                            Log::info('test log5');
-                        }
-
-                        fclose($handle);
-                    }
-                }
-
-            }
-            DB::commit();
-
-            Log::info('test log6');
-            return response()->json(['course' => $course], 200);
+            $course = $this->courseService->createCourse($fields);
+            return response()->json(['course' => $course], ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to create exercise'. $e], 500);
+            return response()->json(['error' => 'Failed to create course'. $e], ResponseAlias::HTTP_BAD_REQUEST);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id): \Illuminate\Http\JsonResponse
+    public function show(string $id): JsonResponse
     {
-        $course = Course::query()->findOrFail($id);
-
-        $uidToEnroll = CourseEnrollment::query()->where('course_id', $id)->pluck('uid')->toArray();
-        $uidEnrolled = $course->users()->pluck('uid')->toArray();
-        $allUids = array_unique(array_merge($uidToEnroll, $uidEnrolled));
-
-        Log::info('$uidToEnroll: ' . implode(', ', $uidToEnroll));
-        Log::info('$uidEnrolled: ' . implode(', ', $uidEnrolled));
-        Log::info('$allUids: ' . implode(', ', $allUids));
-
-        // Build list with enrollment status
-        $uidList = array_map(function($uid) use ($uidEnrolled, $course) {
-            $isEnrolled = in_array($uid, $uidEnrolled);
-            $user = $isEnrolled
-                ? $course->users()->where('uid', $uid)->first()
-                : null;
-
-            return [
-                'uid' => $uid,
-                'enrolled' => $isEnrolled,
-                'user_id' => $user?->id,
-                'first_name' => $user?->first_name,
-                'last_name' => $user?->last_name,
-            ];
-        }, $allUids);
-
-
-
-        // Load exercises with pivot data
-        $exercises = $course->exercises()->get()->map(function ($exercise) {
-            return [
-                'id' => $exercise->pivot->id,
-                'title' => $exercise->title,
-                'description' => $exercise->description,
-                'start_datetime' => $exercise->pivot->start,
-                'end_datetime' => $exercise->pivot->end,
-            ];
-        });
-
-        return response()->json([
-
-            'course' => $course,
-            'uids' => $uidList,
-            'exercises' => $exercises
-        ]);
+        try {
+            $details = $this->courseService->getCourseDetails((int) $id);
+            return response()->json($details, ResponseAlias::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error("Course show error: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch course'], ResponseAlias::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

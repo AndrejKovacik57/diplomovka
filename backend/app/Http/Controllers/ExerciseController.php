@@ -4,94 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
-use App\Models\User;
 use App\Services\ExerciseAccessService;
+use App\Services\ExerciseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use function Pest\Laravel\json;
 
 
 class ExerciseController extends Controller
 {
+    protected ExerciseService $exerciseService;
+
+    public function __construct(ExerciseService $exerciseService)
+    {
+        $this->exerciseService = $exerciseService;
+    }
 
     public function index(): JsonResponse
     {
-        $exercises = Exercise::all();
-
-        return response()->json(['exercises' => $exercises], 200);
+        Log::info('Get all exercise');
+        return response()->json(['exercises' => Exercise::all()], ResponseAlias::HTTP_OK);
     }
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(ExerciseRequest $request): JsonResponse
     {
-        Log::info('test log1 ' . Auth::id());
-        DB::beginTransaction();
-        try {
+        Log::info('Store exercise');
+        try{
             $fields = $request->validated();
-            Log::info('test log2');
-            $exercise = Exercise::query()->create([
-                'title' => $fields['title'],
-                'description' => $fields['description'],
-                'user_id' => Auth::id(), // Associate the exercise with the logged-in user
-            ]);
-            Log::info('test log3');
-            if ($request->has('images')) {
-                foreach ($fields['images'] as $pictureFile) {
-                    $name = $pictureFile->getClientOriginalName();
-                    $filePath = $pictureFile->store('images', 'local');
-                    $exercise->images()->create([
-                        'image_path' => $filePath,
-                        'file_name' => $name
-                    ]);
-                }
-            }
-            if ($request->has('codeFiles')) {
-                foreach ($fields['codeFiles'] as $file) {
-                    $name= $file->getClientOriginalName();
-                    $extension = $file->getClientOriginalExtension();
-                    $filePath = $file->store('codeFiles', 'local');
-                    $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
-                    $finalPath = $noExtensionFilePath . '.' . $extension;
 
-                    Storage::disk('local')->move($filePath, $finalPath);
+            $exercise = $this->exerciseService->createExercise($fields);
 
-                    $exercise->files()->create([
-                        'file_path' => $finalPath,
-                        'file_name' => $name
-                    ]);
-                }
-
-            }
-            if ($request->hasFile('testFile')) {
-                $file = $request->file('testFile');
-                $name = $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension();
-                $filePath = $file->store('testFiles', 'local');
-                $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
-                $finalPath = $noExtensionFilePath . '.' . $extension;
-
-                Storage::disk('local')->move($filePath, $finalPath);
-
-                $exercise->test()->create([
-                    'file_path' => $finalPath,
-                    'file_name' => $name
-                ]);
-            }
-
-
-
-
-            DB::commit();
-            return response()->json(['exercise' => $exercise], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to create exercise'. $e], 500);
+            return response()->json(['exercise' => $exercise], ResponseAlias::HTTP_CREATED);
+        }catch (\Exception $exception){
+            return response()->json(['error' => $exception->getMessage()], ResponseAlias::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -99,43 +56,34 @@ class ExerciseController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $service = new ExerciseAccessService();
-        $result = $service->getExerciseWithFiles($id);
+        Log::info('Get exercise by id');
+        try{
+            $result = $this->exerciseService->getExerciseWithFiles($id);
 
-        return response()->json($result);
+            return response()->json($result, ResponseAlias::HTTP_OK);
+
+        }catch (\Exception $exception){
+            return response()->json(['error' => $exception->getMessage()], ResponseAlias::HTTP_BAD_REQUEST);
+        }
     }
 
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Exercise $exercise)
+    public function update(ExerciseRequest $request, Exercise $exercise)
     {
         DB::beginTransaction();
         try {
-            $fields = $request->validate([
-                'title' => 'required|max:255',
-                'description' => 'required',
-                'images' => 'nullable|array',
-                'codeFiles' => 'nullable|array',
-                'testFiles' => 'nullable|array'
-            ]);
-            if ($request->has('pictures')) {
-                foreach ($fields['pictures'] as $pictureFile) {
-                    $filePath = $pictureFile->store('pictures', 'local'); // Save picture to storage
 
-                    // Create the picture record
-                    $exercise->images()->create([
-                        'file_path' => $filePath
-                    ]);
-                }
-            }
-            $exercise->update($fields);
-            DB::commit();
-            return $exercise;
+            $fields = $request->validated();
+            $exercise = $this->exerciseService->updateExercise($fields, $exercise);
+
+            return response()->json(['exercise' => $exercise], ResponseAlias::HTTP_OK);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to create exercise'], 500);
+            return response()->json(['error' => 'Failed to create exercise'], ResponseAlias::HTTP_BAD_REQUEST);
         }
     }
 

@@ -7,25 +7,34 @@ use App\Jobs\RunSolutionTests;
 use App\Models\CourseExercise;
 use App\Models\Solution;
 use App\Models\User;
+use App\Services\SolutionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class SolutionController extends Controller
 {
+
+    protected SolutionService $solutionService;
+
+    public function __construct(SolutionService $solutionService)
+    {
+        $this->solutionService = $solutionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
+        /** @var User $user */
         $user = Auth::user();
-        \assert($user instanceof User);
-
         $solutions = $user->solutions()->with('courseExercise.course', 'courseExercise.exercise')->get();
 
-        return response()->json($solutions);
+        return response()->json($solutions, ResponseAlias::HTTP_OK);
     }
 
     /**
@@ -33,58 +42,12 @@ class SolutionController extends Controller
      */
     public function store(SolutionRequest $request): JsonResponse
     {
-
-        $fields = $request->validated();
-        $courseId = $fields['courseId'];
-        $exerciseId = $fields['exerciseId'];
-        $userId = Auth::id();
-
-        // Find the CourseExercise row for the course + exercise pair
-        $courseExercise = CourseExercise::query()
-            ->where('course_id', $courseId)
-            ->where('exercise_id', $exerciseId)
-            ->firstOrFail();
-
-        DB::beginTransaction();
         try {
-            $oldSolution = Solution::query()
-                ->where('user_id', $userId)
-                ->where('course_exercise_id', $courseExercise->id)
-                ->first();
-
-            if ($oldSolution) {
-                Storage::disk('local')->delete($oldSolution->file_path);
-                $oldSolution->delete();
-            }
-            Solution::query()
-                ->where('user_id', $userId)
-                ->where('course_exercise_id', $courseExercise->id)
-                ->delete();
-
-            // Process the uploaded file
-            $file = $fields['codeFile'];
-            $name = $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension();
-            $filePath = $file->store('solutions', 'local');
-            $noExtensionFilePath = preg_replace('/\.[^.]+$/', '', $filePath);
-            $finalPath = $noExtensionFilePath . '.' . $extension;
-
-            Storage::disk('local')->move($filePath, $finalPath);
-
-            $solution = Solution::query()->create([
-                'course_exercise_id' => $courseExercise->id,
-                'file_path' => $finalPath,
-                'file_name' => $name,
-                'user_id' => $userId,
-            ]);
-            dispatch(new RunSolutionTests($solution));
-
-
-            DB::commit();
-            return response()->json(['solution' => $solution], 201);
+            $fields = $request->validated();
+            $solution = $this->solutionService->storeSolution($fields);
+            return response()->json(['solution' => $solution], ResponseAlias::HTTP_CREATED);
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to create exercise'. $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to submit solution: ' . $e->getMessage()], 500);
         }
     }
 

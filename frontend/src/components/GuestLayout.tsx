@@ -11,7 +11,7 @@ export default function GuestLayout() {
     }
 
     return(
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen min-w-[400px]">
         <ResponsiveHeader role="guest" />
             <main className="flex-grow px-4 py-6 bg-gray-50">
                 <Outlet />
