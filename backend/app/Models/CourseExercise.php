@@ -16,6 +16,7 @@ class CourseExercise extends Model
     protected $fillable = [
         'course_id',
         'exercise_id',
+        'public',
         'start',
         'end',
     ];

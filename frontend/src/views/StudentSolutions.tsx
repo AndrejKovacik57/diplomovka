@@ -57,28 +57,30 @@ const StudentSolutions: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="container">
-                <div className="user-box">
-                     <Spinner/>
+            <div className="flex justify-center items-center min-h-screen bg-gray-100">
+                <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-3xl">
+                    <Spinner />
                 </div>
             </div>
         );
     }
+
     return (
-        <div className="container">
-            <div className="user-box">
-                <h1>Your Solutions</h1>
+        <div className="flex flex-col items-center bg-gray-100 py-8 px-4 min-h-screen">
+            <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-5xl">
+                <h1 className="text-3xl font-bold mb-6">Your Solutions</h1>
 
                 {courses.length === 0 ? (
                     <p>No courses with submitted solutions.</p>
                 ) : (
                     <>
-                        <div className="course-choose">
-                            <label htmlFor="course-select">Select a course:</label>
+                        <div className="mb-6">
+                            <label htmlFor="course-select" className="block font-semibold mb-2">Select a course:</label>
                             <select
                                 id="course-select"
                                 value={selectedCourseId ?? ""}
                                 onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+                                className="w-full border border-gray-300 rounded-lg p-2"
                             >
                                 <option value="" disabled>Select a course</option>
                                 {courses.map((course) => (
@@ -88,42 +90,40 @@ const StudentSolutions: React.FC = () => {
                                 ))}
                             </select>
                         </div>
+
                         {selectedCourse && (
-                            <div className="course-solutions">
+                            <div className="space-y-6">
                                 {selectedCourse.exercises.map((exercise) => (
-                                    <div key={exercise.id} className="exercise-block">
+                                    <div key={exercise.id} className="space-y-4">
                                         {exercise.solutions.map((solution) => (
-                                            <div className="solution-card">
-                                                <h4>Solution for {exercise.title}</h4>
-                                                <div className="solution-title">
+                                            <div key={solution.id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                                <h4 className="text-lg font-semibold mb-2">Solution for {exercise.title}</h4>
+                                                <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-2 md:space-y-0">
                                                     <div><strong>Status:</strong> {solution.test_status}</div>
                                                     <div><strong>Submitted At:</strong> {new Date(solution.submitted_at).toLocaleString()}</div>
-                                                    <div>
-                                                        <strong>Test result:</strong> {solution.test_output}
-                                                    </div>
-
+                                                    <div><strong>Test result:</strong> {solution.test_output}</div>
                                                 </div>
 
+                                                {solution.test_results.length > 0 ? (
+                                                    <div className="mt-4 grid grid-cols-2 text-sm border border-gray-300 rounded overflow-hidden">
+                                                        {/* Header Row */}
+                                                        <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">Test Name</div>
+                                                        <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300 text-right">Status</div>
 
-                                                {solution && solution.test_results.length > 0 ? (
-                                                    <div className="course-details">
-                                                        <div className="item-list">
-                                                            <div className="item-list-grid">
-                                                                <div className="item-list-header">
-                                                                    <span><strong>Test Name</strong></span>
-                                                                    <span><strong>Status</strong></span>
+                                                        {/* Result Rows */}
+                                                        {solution.test_results.map((result, index) => (
+                                                            <React.Fragment key={result.id}>
+                                                                <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                                    {result.test_name}
                                                                 </div>
-                                                                {solution.test_results.map((result) => (
-                                                                    <div className="item-list-row" key={result.id}>
-                                                                        <span>{result.test_name}</span>
-                                                                        <span>{result.status}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
+                                                                <div className={`px-4 py-2 border-t border-gray-200 text-right ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                                    {result.status}
+                                                                </div>
+                                                            </React.Fragment>
+                                                        ))}
                                                     </div>
                                                 ) : (
-                                                    <p>No test results found.</p>
+                                                    <p className="text-gray-500 mt-2">No test results found.</p>
                                                 )}
 
                                             </div>

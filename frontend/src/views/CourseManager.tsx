@@ -1,35 +1,39 @@
 import React, { useState } from 'react';
-import CourseCreator from "./CourseCreator.tsx";
-import CourseDisplay from "./DisplayCourse.tsx";
+import CourseCreator from './CourseCreator';
+import CourseDisplay from './DisplayCourse';
 
-
-const ExerciseManager: React.FC = () => {
+const CourseManager: React.FC = () => {
     const [mode, setMode] = useState<'create' | 'display'>('create');
 
     return (
-        <div className="container multi-choice">
-            <div className="toggle-container">
-                <div className={`toggle-slider ${mode === 'display' ? 'right' : 'left'}`} />
-
+        <div className="flex flex-col items-center px-4 py-8 md:py-12 bg-gray-100 min-h-screen">
+            {/* Toggle Switch */}
+            <div className="relative flex w-full max-w-md border border-gray-300 rounded-lg overflow-hidden mb-8 bg-white cursor-pointer">
                 <div
-                    className={`toggle-option`}
+                    className={`absolute top-0 bottom-0 w-1/2 bg-gray-100 transition-transform duration-300 ${
+                        mode === 'display' ? 'translate-x-full' : 'translate-x-0'
+                    }`}
+                />
+                <div
+                    className="flex-1 text-center py-3 font-medium z-10"
                     onClick={() => setMode('create')}
                 >
                     Create Course
                 </div>
                 <div
-                    className={`toggle-option`}
+                    className="flex-1 text-center py-3 font-medium z-10"
                     onClick={() => setMode('display')}
                 >
                     Display Course
                 </div>
             </div>
 
-            <div className="container">
+            {/* Mode Display */}
+            <div className="w-full max-w-4xl">
                 {mode === 'create' ? <CourseCreator /> : <CourseDisplay />}
             </div>
         </div>
     );
 };
 
-export default ExerciseManager;
+export default CourseManager;

@@ -40,7 +40,6 @@ const formatDuration = (start: string, end: string): string => {
     return result.trim();
 };
 
-
 const StudentsExercises: React.FC = () => {
     const { user } = useStateContext();
     const [courses, setCourses] = useState<Course[]>([]);
@@ -85,7 +84,6 @@ const StudentsExercises: React.FC = () => {
         return { active, upcoming, ended };
     };
 
-
     const { active, upcoming, ended } = getSortedAndCategorizedExercises();
 
     const openExercise = (exerciseId: number, courseId: number) => {
@@ -94,27 +92,29 @@ const StudentsExercises: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="container">
-                <div className="user-box">
+            <div className="flex flex-col items-center bg-gray-100 flex-grow pt-8">
+                <div className="bg-white p-8 rounded-xl shadow-md text-center w-full max-w-3xl">
                     <Spinner/>
                 </div>
             </div>
         );
     }
+
     return (
-        <div className="container">
-            <div className="user-box">
-                <h1>Your Courses & Exercises</h1>
+        <div className="flex flex-col items-center bg-gray-100 flex-grow pt-8 px-4 min-h-screen">
+            <div className="bg-white p-8 rounded-xl shadow-md text-center w-full max-w-5xl">
+                <h1 className="text-3xl font-bold mb-6">Your Courses & Exercises</h1>
                 {courses.length === 0 ? (
                     <p>No courses found.</p>
                 ) : (
                     <>
-                        <div className={"course-choose"}>
-                            <label htmlFor="course-select">Select a course:</label>
+                        <div className="w-full mb-6 text-left">
+                            <label htmlFor="course-select" className="block font-bold text-lg mb-2">Select a course:</label>
                             <select
                                 id="course-select"
                                 value={selectedCourseId ?? ""}
                                 onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+                                className="w-full text-base p-2 border border-gray-300 rounded-lg"
                             >
                                 <option value="" disabled>Select a course</option>
                                 {courses.map(course => (
@@ -125,91 +125,51 @@ const StudentsExercises: React.FC = () => {
                             </select>
                         </div>
 
-
                         {selectedCourse && (
-
-                            <div className="course-exercises">
-                                <div className="toggle-container">
-                                    <div className={`toggle-slider ${mode === 'ended' ? 'right' : 'left'}`} />
-
-                                    <div
-                                        className={`toggle-option`}
-                                        onClick={() => setMode('active')}
-                                    >
+                            <div>
+                                <div className="flex border border-gray-300 rounded-lg overflow-hidden bg-white mb-4 cursor-pointer">
+                                    <div className={`flex-1 py-3 text-center font-medium transition-colors ${mode === 'active' ? 'bg-gray-100' : ''}`} onClick={() => setMode('active')}>
                                         Active/Upcoming
                                     </div>
-                                    <div
-                                        className={`toggle-option`}
-                                        onClick={() => setMode('ended')}
-                                    >
+                                    <div className={`flex-1 py-3 text-center font-medium transition-colors ${mode === 'ended' ? 'bg-gray-100' : ''}`} onClick={() => setMode('ended')}>
                                         Ended
                                     </div>
                                 </div>
 
-                                <div className="item-list">
+                                <div className="space-y-6">
                                     {mode === 'active' ? (
                                         <>
-                                            {/* 🟢 Active Exercises */}
-                                            <div className="item-list">
-                                                <h3>🟢 Active Exercises</h3>
+                                            <div>
+                                                <h3 className="text-xl font-semibold mb-2">🟢 Active Exercises</h3>
                                                 {active.length === 0 ? (
                                                     <p>No active exercises.</p>
                                                 ) : (
-                                                    <div className="item-list-grid">
-                                                        <div className="item-list-header">
-                                                            <span><strong>Title</strong></span>
-                                                            <span><strong>Start</strong></span>
-                                                            <span><strong>End</strong></span>
-                                                            <span><strong>Duration</strong></span>
-                                                            <span></span>
-                                                        </div>
+                                                    <div className="space-y-2">
                                                         {active.map(exercise => (
-                                                            <div className="item-list-row" key={exercise.id}>
+                                                            <div className="grid grid-cols-1 md:grid-cols-5 gap-2 items-center border-b pb-2" key={exercise.id}>
                                                                 <span>{exercise.title}</span>
                                                                 <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
                                                                 <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
                                                                 <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
-                                                                <span>
-                                                                <button
-                                                                    onClick={() => openExercise(exercise.id, selectedCourse.id)}
-                                                                >
-                                                                    Open
-                                                                </button>
-                                                            </span>
+                                                                <button onClick={() => openExercise(exercise.id, selectedCourse.id)} className="text-blue-600 hover:underline">Open</button>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 )}
                                             </div>
-
-                                            {/* 🟠 Upcoming Exercises */}
-                                            <div className="item-list">
-                                                <h3>🟠 Upcoming Exercises</h3>
+                                            <div>
+                                                <h3 className="text-xl font-semibold mt-6 mb-2">🟠 Upcoming Exercises</h3>
                                                 {upcoming.length === 0 ? (
                                                     <p>No upcoming exercises.</p>
                                                 ) : (
-                                                    <div className="item-list-grid">
-                                                        <div className="item-list-header">
-                                                            <span><strong>Title</strong></span>
-                                                            <span><strong>Start</strong></span>
-                                                            <span><strong>End</strong></span>
-                                                            <span><strong>Duration</strong></span>
-                                                            <span></span>
-                                                        </div>
+                                                    <div className="space-y-2">
                                                         {upcoming.map(exercise => (
-                                                            <div className="item-list-row" key={exercise.id}>
+                                                            <div className="grid grid-cols-1 md:grid-cols-5 gap-2 items-center border-b pb-2" key={exercise.id}>
                                                                 <span>{exercise.title}</span>
                                                                 <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
                                                                 <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
                                                                 <span>{formatDuration(exercise.pivot.start, exercise.pivot.end)}</span>
-                                                                <span>
-                                                                <button
-                                                                    disabled
-                                                                    title="Exercise not yet started"
-                                                                >
-                                                                    Open
-                                                                </button>
-                                                            </span>
+                                                                <button disabled title="Exercise not yet started" className="text-gray-400">Open</button>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -217,22 +177,14 @@ const StudentsExercises: React.FC = () => {
                                             </div>
                                         </>
                                     ) : (
-                                        // 🔴 Ended Exercises
-                                        <div className="item-list">
-                                            <h3>🔴 Ended Exercises</h3>
+                                        <div>
+                                            <h3 className="text-xl font-semibold mb-2">🔴 Ended Exercises</h3>
                                             {ended.length === 0 ? (
                                                 <p>No ended exercises.</p>
                                             ) : (
-                                                <div className="item-list-grid">
-                                                    <div className="item-list-header">
-                                                        <span><strong>Title</strong></span>
-                                                        <span><strong>Start</strong></span>
-                                                        <span><strong>End</strong></span>
-                                                        <span><strong>Duration</strong></span>
-                                                        <span></span>
-                                                    </div>
+                                                <div className="space-y-2">
                                                     {ended.map(exercise => (
-                                                        <div className="item-list-row" key={exercise.id}>
+                                                        <div className="grid grid-cols-1 md:grid-cols-5 gap-2 items-center border-b pb-2" key={exercise.id}>
                                                             <span>{exercise.title}</span>
                                                             <span>{new Date(exercise.pivot.start).toLocaleString()}</span>
                                                             <span>{new Date(exercise.pivot.end).toLocaleString()}</span>
@@ -244,11 +196,7 @@ const StudentsExercises: React.FC = () => {
                                             )}
                                         </div>
                                     )}
-
-
                                 </div>
-
-
                             </div>
                         )}
                     </>

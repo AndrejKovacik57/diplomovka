@@ -1,22 +1,14 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {useStateContext} from "../contexts/ContextProvider.tsx";
 import axiosClient from "../axios-client.tsx";
 import {useLocation} from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
+import Spinner from "../components/Spinner.tsx";
 
 const GoogleCallBack: React.FC = () => {
     const {setUser, setToken} = useStateContext();
     const location = useLocation();
-    const [dots, setDots] = useState("");
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setDots(prev => prev.length >= 3 ? "" : prev + ".");
-        }, 300);  // Change speed here (500ms)
-
-        return () => clearInterval(interval);  // Cleanup on unmount
-    }, []);
 
     useEffect(() => {
         if (window.location.pathname.includes('auth/google') &&  window.location.search.includes('error=access_denied')) {
@@ -36,18 +28,17 @@ const GoogleCallBack: React.FC = () => {
             const response = error.response;
 
             console.log(response.data.errors);
-            if(response && response.status === 422){
-            }
         })
-    }, [location.search, setToken, setUser]);
+    }, [location.search, navigate, setToken, setUser]);
 
     return (
-        <div className="container">
-            <div className="box">
-                <h2>Google login <span style={{ display: "inline-block", width: "3ch", textAlign: "left" }}>{dots}</span></h2>
+        <div className="flex items-center justify-center h-screen bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md text-center">
+                <Spinner />
             </div>
         </div>
-    )
+    );
+
 }
 
 

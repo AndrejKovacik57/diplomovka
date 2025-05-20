@@ -1,8 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider.tsx";
-import StudentHeader from "./StudentHeader.tsx";
-import TeacherHeader from "./TeacherHeader.tsx";
 import { ToastContainer } from "react-toastify";
+import ResponsiveHeader from "./ResponsiveHeader.tsx";
 
 export default function DefaultLayout() {
     const { user, token } = useStateContext();
@@ -13,7 +12,9 @@ export default function DefaultLayout() {
 
     return (
         <div className="flex flex-col min-h-screen">
-            {user?.employee_type === "teacher" ? <TeacherHeader /> : <StudentHeader />}
+            {user?.employee_type === "teacher" ?
+                <ResponsiveHeader role="teacher" />
+                : <ResponsiveHeader role="student" />}
             <main className="flex-grow px-4 py-6 bg-gray-50">
                 <Outlet />
             </main>
