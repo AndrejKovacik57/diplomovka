@@ -12,8 +12,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\DB;
 
 class RunSolutionTests implements ShouldQueue
 {
@@ -106,33 +106,31 @@ class RunSolutionTests implements ShouldQueue
                     'failed' => [],
                 ];
                 foreach ($lines as $line) {
-                    if (preg_match('/^\[PASS\] (\w+)/', $line, $matches)) {
+                    if (preg_match('/^\[PASS] (\w+)/', $line, $matches)) {
                         $results['passed'][] = $matches[1];
-                    } elseif (preg_match('/^\[FAIL\] (\w+)/', $line, $matches)) {
+                    } elseif (preg_match('/^\[FAIL] (\w+)/', $line, $matches)) {
                         $results['failed'][] = $matches[1];
                     }
                 }
                 $solutionId = $this->solution->id;
-                $this->createTestResult($results, 'passed', $solutionId);
-                $this->createTestResult($results, 'failed', $solutionId);
-                $numOfSuccessful = count($results['passed']);
-                $numOfFailed = count($results['failed']);
-                $total = $numOfSuccessful + $numOfFailed;
+                DB::transaction(function () use ($results, $solutionId) {
+                    $this->solution->test_status = Solution::STATUS_FINISHED;
+                    $this->solution->test_output = count($results['passed']) . '/' .
+                        (count($results['passed']) + count($results['failed']));
+                    $this->solution->save();
 
-                Log::info('Test results', $results);
-
-
-                Log::info("Test succeeded. Output: $output");
-                $this->solution->test_status = Solution::STATUS_FINISHED;
-                $this->solution->test_output = "$numOfSuccessful/$total";
-                $this->solution->save();
+                    $this->createTestResult($results, 'passed', $solutionId);
+                    $this->createTestResult($results, 'failed', $solutionId);
+                });
             }
 
         } catch (Exception $e) {
             Log::error("Test execution failed: " . $e->getMessage());
-            $this->solution->test_status = Solution::STATUS_FAILED;
+            DB::transaction(function () {
+                $this->solution->test_status = Solution::STATUS_FAILED;
+                $this->solution->save();
+            });
 
-            $this->solution->save();
 
         } finally {
             $solutionFile = "/sandbox/test/{$solutionName}";
