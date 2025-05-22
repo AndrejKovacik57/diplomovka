@@ -71,11 +71,4 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Solution::class);
     }
 
-    public function hasSubmittedSolution($courseId, $exerciseId): bool
-    {
-        return $this->solutions()
-            ->where('course_id', $courseId)
-            ->where('exercise_id', $exerciseId)
-            ->exists();
-    }
 }

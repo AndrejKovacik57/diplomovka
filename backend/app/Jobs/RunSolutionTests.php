@@ -32,6 +32,11 @@ class RunSolutionTests implements ShouldQueue
      */
     public function handle(): void
     {
+        if (!$this->solution->is_active || $this->solution->test_status !== Solution::STATUS_PENDING) {
+            Log::warning("Aborting test: Solution is inactive or already processed (ID: {$this->solution->id})");
+            return;
+        }
+
         Log::info("Starting test job for Solution ID: {$this->solution->id}");
         $this->solution->test_status = Solution::STATUS_RUNNING;
         $this->solution->save();
@@ -152,17 +157,20 @@ class RunSolutionTests implements ShouldQueue
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function copyFile(string $newName, string $filePath): string {
         $sourcePath = storage_path("app/private/{$filePath}");
         $destinationPath = "/sandbox/test/{$newName}";
 
-        if (file_exists($sourcePath)) {
-            // Copy the file manually
-            copy($sourcePath, $destinationPath);
-            Log::info("Copied {$sourcePath} to {$destinationPath}");
-        } else {
-            Log::warning("Source file does not exist: {$sourcePath}");
+        if (!file_exists($sourcePath)) {
+            Log::error("Required file missing: {$sourcePath}");
+            throw new Exception("Required file missing: {$sourcePath}");
         }
+
+        copy($sourcePath, $destinationPath);
+        Log::info("Copied {$sourcePath} to {$destinationPath}");
 
         return $destinationPath;
     }

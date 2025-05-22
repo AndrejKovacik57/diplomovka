@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_exercise_id')->constrained('course_exercise')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->unique(['course_exercise_id', 'user_id']);
             $table->string('file_path');
             $table->string('file_name');
             $table->enum('test_status', ['pending', 'running', 'finished', 'failed'])->default('pending');
             $table->text('test_output')->nullable();
+            $table->boolean('is_active')->default(true); // New column
             $table->timestamp('submitted_at')->useCurrent();
-
             $table->timestamps();
         });
+
     }
 
     /**

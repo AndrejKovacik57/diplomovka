@@ -32,7 +32,11 @@ class SolutionController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $solutions = $user->solutions()->with('courseExercise.course', 'courseExercise.exercise')->get();
+        $solutions = $user->solutions()
+            ->active()
+            ->with('courseExercise.course', 'courseExercise.exercise')
+            ->get();
+
 
         return response()->json($solutions, ResponseAlias::HTTP_OK);
     }

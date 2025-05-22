@@ -28,13 +28,23 @@ class SolutionService
         }
 
         return DB::transaction(function () use ($courseExercise, $userId, $fields) {
-            $existingSolution = Solution::query()->where('user_id', $userId)
-                ->where('course_exercise_id', $courseExercise->id)
-                ->first();
 
-            if ($existingSolution) {
-                Storage::disk('local')->delete($existingSolution->file_path);
-                $existingSolution->delete();
+            Solution::query()
+                ->where('user_id', $userId)
+                ->where('course_exercise_id', $courseExercise->id)
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
+
+            $oldSolutions = Solution::query()
+                ->where('user_id', $userId)
+                ->where('course_exercise_id', $courseExercise->id)
+                ->where('is_active', false)
+                ->whereIn('test_status', [Solution::STATUS_FINISHED, Solution::STATUS_FAILED])
+                ->get();
+
+            foreach ($oldSolutions as $old) {
+                Storage::disk('local')->delete($old->file_path);
+                $old->delete();
             }
 
             $file = $fields['codeFile'];

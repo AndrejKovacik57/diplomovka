@@ -88,6 +88,7 @@ class StudentService
 
                 $solutions = $courseExercise->solutions()
                     ->where('user_id', $user->id)
+                    ->active()
                     ->with('testResults')
                     ->get();
 

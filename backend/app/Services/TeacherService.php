@@ -63,6 +63,7 @@ class TeacherService
 
             $solutions = $courseExercise->solutions()
                 ->where('user_id', $userId)
+                ->active()
                 ->with('testResults')
                 ->get();
 

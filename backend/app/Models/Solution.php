@@ -30,7 +30,14 @@ class Solution extends Model
         'file_name',
         'test_status',
         'test_output',
+        'is_active',
     ];
+
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 
     public function user(): BelongsTo
     {
