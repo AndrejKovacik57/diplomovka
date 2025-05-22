@@ -7,7 +7,6 @@ use App\Http\Controllers\SolutionController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
-use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -39,7 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me/solutions', [StudentController::class, 'getUserSolutions']);
 });
 
-// Teacher-only routes
 Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
     Route::apiResource('courses', CourseController::class);
     Route::apiResource('exercises', ExerciseController::class);

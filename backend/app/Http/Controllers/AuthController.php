@@ -7,6 +7,7 @@ use App\Http\Requests\SignUpRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class AuthController extends Controller
 {
@@ -23,10 +24,10 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
             $result = $this->authService->register($data);
-            return response()->json($result, 200);
+            return response()->json($result, ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
             report($e);
-            return response()->json(['error' => 'Registration failed'], 500);
+            return response()->json(['error' => 'Registration failed'], ResponseAlias::HTTP_BAD_REQUEST);
         }
     }
 
@@ -36,15 +37,15 @@ class AuthController extends Controller
         $result = $this->authService->authenticate($data);
 
         if (!$result) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            return response()->json(['error' => 'Invalid credentials'], ResponseAlias::HTTP_UNAUTHORIZED);
         }
 
-        return response()->json($result, 200);
+        return response()->json($result, ResponseAlias::HTTP_OK);
     }
 
     public function logout(Request $request): JsonResponse
     {
         $this->authService->logout($request->user());
-        return response()->json([], 204);
+        return response()->json([], ResponseAlias::HTTP_UNAUTHORIZED);
     }
 }

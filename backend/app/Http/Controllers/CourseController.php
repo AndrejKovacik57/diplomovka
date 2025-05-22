@@ -45,8 +45,7 @@ class CourseController extends Controller
             $course = $this->courseService->createCourse($fields);
             return response()->json(['course' => $course], ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to create course'. $e], ResponseAlias::HTTP_BAD_REQUEST);
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
 
@@ -59,8 +58,7 @@ class CourseController extends Controller
             $details = $this->courseService->getCourseDetails((int) $id);
             return response()->json($details, ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
-            Log::error("Course show error: " . $e->getMessage());
-            return response()->json(['error' => 'Failed to fetch course'], ResponseAlias::HTTP_BAD_REQUEST);
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
 

@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ThirdPartyAuthService
 {
@@ -21,18 +22,18 @@ class ThirdPartyAuthService
         try {
             $socialiteUser = Socialite::driver('google')->stateless()->user();
         } catch (ClientException $e) {
-            throw new \Exception('Invalid credentials provided.', 422);
+            abort(ResponseAlias::HTTP_UNPROCESSABLE_ENTITY, 'Invalid credentials provided.');
         }
 
         return DB::transaction(function () use ($socialiteUser) {
-            $user = User::where('email', $socialiteUser->getEmail())->first();
+            $user = User::query()->where('email', $socialiteUser->getEmail())->first();
 
             if (!$user) {
                 $nameParts = explode(' ', $socialiteUser->getName(), 2);
                 $firstName = $nameParts[0] ?? '';
                 $lastName = $nameParts[1] ?? '';
 
-                $user = User::firstOrCreate([
+                $user = User::query()->firstOrCreate([
                     'email' => $socialiteUser->getEmail()
                 ], [
                     'first_name' => $firstName,
@@ -67,14 +68,14 @@ class ThirdPartyAuthService
         $ldapconn = ldap_connect("ldap.stuba.sk");
 
         if (!$ldapconn) {
-            throw new \Exception("Could not connect to LDAP server.", 500);
+            abort(ResponseAlias::HTTP_INTERNAL_SERVER_ERROR, 'Could not connect to LDAP server.');
         }
 
         ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
         $ldapbind = ldap_bind($ldapconn, $ldaprdn, $ldappass);
 
         if (!$ldapbind) {
-            throw new \Exception("LDAP bind failed.", 403);
+            abort(ResponseAlias::HTTP_FORBIDDEN, 'LDAP bind failed.');
         }
 
         $filter = "(uid=$ldapuid)";
@@ -82,7 +83,7 @@ class ThirdPartyAuthService
         $entries = ldap_get_entries($ldapconn, $result);
 
         if (!isset($entries[0])) {
-            throw new \Exception("No LDAP entries found.", 404);
+            abort(ResponseAlias::HTTP_NOT_FOUND, 'No LDAP entries found.');
         }
 
         $userData = [];
@@ -92,7 +93,7 @@ class ThirdPartyAuthService
             }
         }
 
-        $user = User::findOrFail(Auth::id());
+        $user = User::query()->findOrFail(Auth::id());
 
         return DB::transaction(function () use ($user, $userData) {
             $user->uid = $userData['uid'] ?? null;
@@ -103,7 +104,7 @@ class ThirdPartyAuthService
 
             $token = $user->createToken('main')->plainTextToken;
 
-            $enrollments = CourseEnrollment::where('uid', $user->uid)->get();
+            $enrollments = CourseEnrollment::query()->where('uid', $user->uid)->get();
             foreach ($enrollments as $enrollment) {
                 $course = $enrollment->course;
                 if (!$course->users()->where('user_id', $user->id)->exists()) {

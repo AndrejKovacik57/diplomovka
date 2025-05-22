@@ -51,7 +51,7 @@ class SolutionController extends Controller
             $solution = $this->solutionService->storeSolution($fields);
             return response()->json(['solution' => $solution], ResponseAlias::HTTP_CREATED);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to submit solution: ' . $e->getMessage()], 500);
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
 

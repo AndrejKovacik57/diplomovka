@@ -20,14 +20,9 @@ class ExerciseService
         //
     }
 
-    /**
-     * @throws Exception
-     */
     public function createExercise(array $fields): Exercise
     {
-        DB::beginTransaction();
-
-        try {
+        return DB::transaction(function () use ($fields) {
             $exercise = Exercise::query()->create([
                 'title' => $fields['title'],
                 'description' => $fields['description'],
@@ -38,16 +33,10 @@ class ExerciseService
             $this->handleCodeFiles($exercise, $fields);
             $this->handleTestFile($exercise, $fields);
 
-            DB::commit();
-
             return $exercise;
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Exercise creation failed: ' . $e->getMessage());
-            throw $e;
-        }
+        });
     }
+
     protected function handleImages(Exercise $exercise, array $fields): void
     {
         foreach ($fields['images'] as $pictureFile) {
@@ -94,14 +83,9 @@ class ExerciseService
         ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public function updateExercise(array $fields, Exercise $exercise): Exercise
     {
-        DB::beginTransaction();
-        try {
-
+        return DB::transaction(function () use ($fields, $exercise) {
             foreach ($fields['pictures'] as $pictureFile) {
                 $filePath = $pictureFile->store('pictures', 'local');
                 $exercise->images()->create(['file_path' => $filePath]);
@@ -109,20 +93,13 @@ class ExerciseService
 
             $exercise->update($fields);
 
-            DB::commit();
             return $exercise;
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Exercise update failed: ' . $e->getMessage());
-            throw $e;
-        }
+        });
     }
     public function getExerciseWithFiles($exerciseId): array
     {
         $exercise = Exercise::with(['images', 'files'])->findOrFail($exerciseId);
 
-        // Transform images to include actual file data
         $images = $exercise->images->map(function ($image) {
             return [
                 'file_name' => $image->file_name,
@@ -130,7 +107,6 @@ class ExerciseService
             ];
         });
 
-        // Transform files to include actual file data
         $files = $exercise->files->map(function ($file) {
             return [
                 'file_name' => $file->file_name,

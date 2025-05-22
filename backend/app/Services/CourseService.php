@@ -19,9 +19,7 @@ class CourseService
      */
     public function createCourse(array $data): Course
     {
-        DB::beginTransaction();
-
-        try {
+        return DB::transaction(function () use ($data) {
             $course = Course::query()->create([
                 'name' => $data['name'],
                 'semester' => $data['semester'],
@@ -32,13 +30,8 @@ class CourseService
                 $this->processCsvFile($csvFile, $course->id);
             }
 
-            DB::commit();
             return $course;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Failed to create course: " . $e->getMessage());
-            throw $e;
-        }
+        });
     }
 
     private function processCsvFile($csvFile, int $courseId): void

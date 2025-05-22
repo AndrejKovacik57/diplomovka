@@ -25,31 +25,47 @@ class StudentController extends Controller
 
     public function getUsersCourseExercises(): JsonResponse
     {
-        /** @var User $user */
-        $user = Auth::user();
+        try {
+            /** @var User $user */
+            $user = Auth::user();
 
-        $courses = $this->studentService->getUserCoursesWithExercises($user);
+            $courses = $this->studentService->getUserCoursesWithExercises($user);
 
-        return response()->json(['courses' => $courses], ResponseAlias::HTTP_CREATED);
-    }
+            return response()->json(['courses' => $courses], ResponseAlias::HTTP_CREATED);
+
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
+        }
+     }
 
     public function getUserExercise(Request $request, $courseId, $exerciseId): JsonResponse
     {
-        /** @var User $user */
-        $user = auth()->user();
-        $exercise = $this->studentService->getUserExercise($user, (int)$courseId, (int)$exerciseId);
+        try {
+            /** @var User $user */
+            $user = auth()->user();
+            $exercise = $this->studentService->getUserExercise($user, (int)$courseId, (int)$exerciseId);
 
-        return response()->json($exercise, ResponseAlias::HTTP_OK);
+            return response()->json($exercise, ResponseAlias::HTTP_OK);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
+        }
     }
 
     public function getUserSolutions(Request $request): JsonResponse
     {
-        /** @var User $user */
-        $user = Auth::user();
+        try {
+            /** @var User $user */
+            $user = Auth::user();
 
-        $solutions = $this->studentService->getUserSolutions($user);
+            $solutions = $this->studentService->getUserSolutions($user);
 
-        return response()->json($solutions, ResponseAlias::HTTP_OK);
+            return response()->json($solutions, ResponseAlias::HTTP_OK);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
+        }
     }
 
 }

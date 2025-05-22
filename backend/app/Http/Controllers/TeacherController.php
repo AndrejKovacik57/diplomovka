@@ -28,9 +28,11 @@ class TeacherController extends Controller
         try {
             $exercise = $this->teacherService->addExerciseToCourse($courseId, $exerciseId);
             return response()->json(['exercise' => $exercise], ResponseAlias::HTTP_OK);
-        } catch (\RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 409);
-        }}
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
+        }
+    }
 
     public function updateDatesCourseExercise(Request $request): JsonResponse
     {
@@ -43,12 +45,9 @@ class TeacherController extends Controller
 
             $this->teacherService->updateCourseExerciseDates($validated);
             return response()->json(['message' => 'Dates updated successfully.']);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
 
@@ -60,9 +59,9 @@ class TeacherController extends Controller
                 return response()->json(null, 204);
             }
             return response()->json($exercises);
-        } catch (\Exception $e) {
-            Log::error('Failed to retrieve user solutions: ' . $e->getMessage());
-            return response()->json(['message' => 'Error fetching solutions', 'error' => $e->getMessage()], 500);
+        }
+        catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
 }

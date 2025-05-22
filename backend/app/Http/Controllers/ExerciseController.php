@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
-use App\Services\ExerciseAccessService;
 use App\Services\ExerciseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,8 +44,8 @@ class ExerciseController extends Controller
             $exercise = $this->exerciseService->createExercise($fields);
 
             return response()->json(['exercise' => $exercise], ResponseAlias::HTTP_CREATED);
-        }catch (\Exception $exception){
-            return response()->json(['error' => $exception->getMessage()], ResponseAlias::HTTP_BAD_REQUEST);
+        }catch (\Exception $e){
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
 
     }
@@ -73,7 +72,6 @@ class ExerciseController extends Controller
      */
     public function update(ExerciseRequest $request, Exercise $exercise)
     {
-        DB::beginTransaction();
         try {
 
             $fields = $request->validated();
@@ -82,8 +80,7 @@ class ExerciseController extends Controller
             return response()->json(['exercise' => $exercise], ResponseAlias::HTTP_OK);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Failed to create exercise'], ResponseAlias::HTTP_BAD_REQUEST);
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
 
