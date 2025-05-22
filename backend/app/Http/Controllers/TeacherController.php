@@ -2,16 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\CourseExercise;
-use App\Models\Exercise;
 use App\Services\TeacherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class TeacherController extends Controller
@@ -23,7 +16,7 @@ class TeacherController extends Controller
         $this->teacherService = $teacherService;
     }
 
-    public function addExercise(string $courseId, string $exerciseId): \Illuminate\Http\JsonResponse
+    public function addExercise(string $courseId, string $exerciseId): JsonResponse
     {
         try {
             $exercise = $this->teacherService->addExerciseToCourse($courseId, $exerciseId);

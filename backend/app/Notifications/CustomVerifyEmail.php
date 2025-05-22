@@ -5,11 +5,8 @@ namespace App\Notifications;
 namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Str;
 
 class CustomVerifyEmail extends VerifyEmail

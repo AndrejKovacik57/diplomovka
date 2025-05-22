@@ -2,15 +2,11 @@
 
 namespace App\Services;
 
-use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
 use App\Models\User;
 use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class CourseService
 {

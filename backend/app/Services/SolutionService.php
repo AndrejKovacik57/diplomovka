@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use App\Http\Requests\SolutionRequest;
 use App\Jobs\RunSolutionTests;
 use App\Models\CourseExercise;
 use App\Models\Solution;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

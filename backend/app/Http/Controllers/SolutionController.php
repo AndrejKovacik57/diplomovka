@@ -3,16 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SolutionRequest;
-use App\Jobs\RunSolutionTests;
-use App\Models\CourseExercise;
 use App\Models\Solution;
 use App\Models\User;
 use App\Services\SolutionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class SolutionController extends Controller

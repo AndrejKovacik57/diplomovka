@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
 use App\Models\User;
-use App\Services\ExerciseService;
 use App\Services\StudentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class StudentController extends Controller

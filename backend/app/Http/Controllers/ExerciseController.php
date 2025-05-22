@@ -6,14 +6,8 @@ use App\Http\Requests\ExerciseRequest;
 use App\Models\Exercise;
 use App\Services\ExerciseService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
-use function Pest\Laravel\json;
 
 
 class ExerciseController extends Controller

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\CourseExercise;
 use App\Models\Exercise;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
