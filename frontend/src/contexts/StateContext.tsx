@@ -56,7 +56,7 @@ export const ContextProvider = ({ children }: ContextProviderProps) => {
             return;
         }
 
-        axiosClient.get('/user')
+        axiosClient.get('/me')
             .then(({ data }) => {
                 setUser(data);
             })

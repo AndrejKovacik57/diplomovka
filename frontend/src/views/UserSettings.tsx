@@ -21,7 +21,7 @@ const UserSettings: React.FC = () => {
             password,
         };
 
-        axiosClient.post("/aislog", payLoad)
+        axiosClient.post("/ais/login", payLoad)
             .then(({ data }) => {
                 setUser(data.user);
                 setToken(data.token);

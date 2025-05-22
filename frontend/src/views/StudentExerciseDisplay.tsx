@@ -17,7 +17,7 @@ const StudentExerciseDisplay = () => {
     const solutionInputRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
         if (user) {
-            axiosClient.get(`user/course/${courseId}/exercise/${exerciseId}/`)
+            axiosClient.get(`me/courses/${courseId}/exercises/${exerciseId}/`)
                 .then(({ data }) => {
                     setExerciseDetails(data);
                 })
@@ -46,7 +46,7 @@ const StudentExerciseDisplay = () => {
             formData.append('codeFile', uploadedCodeFile);
         }
 
-        axiosClient.post('/solution', formData, {
+        axiosClient.post('/solutions', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         })
             .then(({ }) => {

@@ -51,7 +51,7 @@ const StudentsExercises: React.FC = () => {
     useEffect(() => {
         if (user) {
             setLoading(true);
-            axiosClient.get('user/courses/exercises')
+            axiosClient.get('me/exercises')
                 .then(({ data }) => {
                     setCourses(data.courses || []);
                     setLoading(false);
@@ -87,7 +87,7 @@ const StudentsExercises: React.FC = () => {
     const { active, upcoming, ended } = getSortedAndCategorizedExercises();
 
     const openExercise = (exerciseId: number, courseId: number) => {
-        navigate(`/course/${courseId}/exercise/${exerciseId}`);
+        navigate(`/courses/${courseId}/exercises/${exerciseId}`);
     };
 
     if (loading) {

@@ -14,7 +14,7 @@ const GoogleCallBack: React.FC = () => {
         if (window.location.pathname.includes('auth/google') &&  window.location.search.includes('error=access_denied')) {
             navigate('/login');
         }
-        axiosClient.get(`/auth/callback${location.search}`, {
+        axiosClient.get(`/auth/google/callback${location.search}`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'

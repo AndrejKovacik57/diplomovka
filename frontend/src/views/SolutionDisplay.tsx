@@ -6,7 +6,7 @@ const ExerciseDisplay: React.FC = () => {
     const [selectedolutionId, setSelectedSolutionId] = useState<number | null>(null);
     const [output, setOutput] = useState<string | null>(null);
 
-    useEffect(() => {axiosClient.get('/solution',)
+    useEffect(() => {axiosClient.get('/solutions',)
         .then(({data}) => {
             console.log('data ', data);
             setSolutions(data);

@@ -13,7 +13,7 @@ const Header = () => {
     const onLogout = (ev: React.MouseEvent<HTMLButtonElement>) => {
         ev.preventDefault()
 
-        axiosClient.post('/logout')
+        axiosClient.post('/auth/logout')
             .then(() => {
                 setUser(null)
                 setToken(null)

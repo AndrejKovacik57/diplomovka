@@ -8,7 +8,7 @@ const StudentHeader = () => {
 
     const onLogout = (ev: React.MouseEvent<HTMLButtonElement>) => {
         ev.preventDefault();
-        axiosClient.post("/logout").then(() => {
+        axiosClient.post("/auth/logout").then(() => {
             setUser(null);
             setToken(null);
         });

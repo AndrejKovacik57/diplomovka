@@ -82,7 +82,7 @@ const CourseDisplay: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setUserExercises([]);
-        axiosClient.get(`/course/${selectedCourseId}`).then(({ data }) => {
+        axiosClient.get(`/courses/${selectedCourseId}`).then(({ data }) => {
             setCourseDetails({
                 description: data.course.description,
                 uids: data.uids,
@@ -129,7 +129,7 @@ const CourseDisplay: React.FC = () => {
         if (!exercise) return;
 
         axiosClient
-            .post("/course/exercise/updateDates", {
+            .post("/courses/exercises/dates", {
                 id,
                 start: exercise.start_datetime,
                 end: exercise.end_datetime,
@@ -152,7 +152,7 @@ const CourseDisplay: React.FC = () => {
         }
 
         axiosClient
-            .get(`/course/${selectedCourseId}/user/${id}/exercise/solutions`)
+            .get(`/courses/${selectedCourseId}/users/${id}/exercises/solutions`)
             .then(({ data, status }) => {
                 if (status === 204) {
                     setSelectedUserId(null);

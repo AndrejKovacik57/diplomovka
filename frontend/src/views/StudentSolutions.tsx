@@ -43,7 +43,7 @@ const StudentSolutions: React.FC = () => {
         if (user) {
             setLoading(true);
             axiosClient
-                .get("/user/courses/exercises/solutions")
+                .get("/me/solutions")
                 .then(({ data }) => {
                     setCourses(data);
                     setLoading(false);
