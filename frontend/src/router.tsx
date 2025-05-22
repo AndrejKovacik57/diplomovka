@@ -21,6 +21,7 @@ import Home from "./views/Home.tsx";
 import StudentExerciseDisplay from "./views/StudentExerciseDisplay.tsx";
 import Forbidden from "./views/Forbidden.tsx";
 import StudentSolutions from "./views/StudentSolutions.tsx";
+import EmailVerification from "./views/EmailVerification.tsx";
 
 function AppRouter() {
     const { user } = useStateContext();
@@ -43,6 +44,8 @@ function AppRouter() {
     const commonRoutes = [
         { path: 'course', element: <CourseCreator /> },
         { path: 'displayCourse', element: <DisplayCourse /> },
+        { path: '/email/verify/:id/:hash', element: <EmailVerification /> },
+
     ];
 
     const isAuthenticated = !!user;

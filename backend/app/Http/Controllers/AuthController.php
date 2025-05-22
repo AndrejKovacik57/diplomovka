@@ -29,7 +29,7 @@ class AuthController extends Controller
                 'password' => bcrypt($data['password'])
             ]);
             $token = $user->createToken('main')->plainTextToken;
-
+            $user->sendEmailVerificationNotification();
             DB::commit();
             return response()->json(['user' => $user, 'token' => $token], 200);
         } catch (\Exception $e) {
@@ -45,6 +45,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
         $user = Auth::user();
+
         \assert($user instanceof User);
         $token = $user->createToken('main')->plainTextToken;
 

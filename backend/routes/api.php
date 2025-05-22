@@ -7,6 +7,7 @@ use App\Http\Controllers\SolutionController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\TeacherController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -47,3 +48,18 @@ Route::post('login', [AuthController::class, 'login']);
 
 Route::get('auth', [AuthControllerThirdParty::class, 'redirectToAuthGoogle']);
 Route::get('auth/callback', [AuthControllerThirdParty::class, 'handleAuthCallback']);
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $user = $request->user();
+    $request->fulfill();
+    return response()->json(['message' => 'Email verified successfully', 'user'=>$user]);
+})->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
+
+
+
+
+// Optional: Allow resending verification email
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return response()->json(['message' => 'Verification link sent!']);
+})->middleware(['auth:sanctum', 'throttle:6,1']);

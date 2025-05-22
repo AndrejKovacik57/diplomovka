@@ -303,7 +303,7 @@ const CourseDisplay: React.FC = () => {
                                     {/* Data Rows */}
                                     {courseDetails.exercises.map((ex, index) => (
                                         <React.Fragment key={ex.id}>
-                                            <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                            <div className={`px-4 py-2 border-t border-gray-200 justify-center content-center ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                                                 {ex.id} - {ex.title}
                                             </div>
                                             <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
@@ -322,7 +322,7 @@ const CourseDisplay: React.FC = () => {
                                                     className="w-full border border-gray-300 rounded-md p-2"
                                                 />
                                             </div>
-                                            <div className={`px-4 py-2 border-t border-gray-200 flex items-center ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                            <div className={`px-4 py-2 border-t border-gray-200 flex items-center  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                                                 <button
                                                     onClick={() => handleUpdateExerciseDates(ex.id)}
                                                     className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -334,34 +334,35 @@ const CourseDisplay: React.FC = () => {
                                     ))}
                                 </div>
 
-                                <div className="mt-8">
-                                    <h4 className="text-xl font-bold mb-4">Add Exercise</h4>
-                                    <form onSubmit={handleExerciseSubmit} className="space-y-4">
-                                        <select
-                                            className="p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                            onChange={(e) => setSelectedExerciseId(Number(e.target.value))}
-                                            required
-                                        >
-                                            <option value="">-- Add Exercise --</option>
-                                            {exercises.map((exercise) => (
-                                                <option key={exercise.id} value={exercise.id}>
-                                                    {exercise.id + " " + exercise.title}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            type="submit"
-                                            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
-                                        >
-                                            Submit Exercise
-                                        </button>
-                                    </form>
-                                    {exerciseMessage && <div className="text-green-600 mt-2">{exerciseMessage}</div>}
-                                    {exerciseErrorMessage && <div className="text-red-600 mt-2">{exerciseErrorMessage}</div>}
-                                </div>
+
                             </div>
 
                         )}
+                        <div className="mt-8">
+                            <h4 className="text-xl font-bold mb-4">Add Exercise</h4>
+                            <form onSubmit={handleExerciseSubmit} className="space-y-4">
+                                <select
+                                    className="p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    onChange={(e) => setSelectedExerciseId(Number(e.target.value))}
+                                    required
+                                >
+                                    <option value="">-- Add Exercise --</option>
+                                    {exercises.map((exercise) => (
+                                        <option key={exercise.id} value={exercise.id}>
+                                            {exercise.id + " " + exercise.title}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="submit"
+                                    className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+                                >
+                                    Submit Exercise
+                                </button>
+                            </form>
+                            {exerciseMessage && <div className="text-green-600 mt-2">{exerciseMessage}</div>}
+                            {exerciseErrorMessage && <div className="text-red-600 mt-2">{exerciseErrorMessage}</div>}
+                        </div>
                     </>
                 )}
 
