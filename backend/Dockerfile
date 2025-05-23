@@ -37,8 +37,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install gd pdo pdo_pgsql mbstring zip exif pcntl bcmath opcache ldap
 
 # Install Redis extension
-RUN pecl install redis \
-    && docker-php-ext-enable redis \
+RUN pecl install redis && docker-php-ext-enable redis
+
 
 # Clone and build nsjail
 RUN git clone https://github.com/google/nsjail /opt/nsjail \
