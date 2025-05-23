@@ -159,6 +159,20 @@ const CourseDisplay: React.FC = () => {
             })
             .finally(() => setLoading(false));
     };
+    const handleExportCSV =  (courseExercise: number) => {
+        if (!selectedCourseId) return;
+        axiosClient
+            .get(`/courses/exercises/${courseExercise}/solutions/export`, { responseType: 'blob' })
+            .then(({data}) => {
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `course_exercise_${courseExercise}_solutions.csv`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            })
+    };
 
     return (
         <div className="flex justify-center p-4 md:p-8">
@@ -278,8 +292,9 @@ const CourseDisplay: React.FC = () => {
                                         disabled={currentPage >= Math.ceil(courseDetails.uids.length / itemsPerPage)}
                                         className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
                                     >
-                                        {t("exercises")}
+                                        {t("next")}
                                     </button>
+
                                 </div>
                             </div>
                         </div>
@@ -289,17 +304,17 @@ const CourseDisplay: React.FC = () => {
                         {courseDetails.exercises.length > 0 && (
                             <div className="mt-8">
                                 <h4 className="text-xl font-bold mb-4">{t("next")}</h4>
-                                <div className="grid grid-cols-4 text-sm border border-gray-300 rounded overflow-hidden">
+                                <div className="grid grid-cols-1 sm:grid-cols-4 text-sm border border-gray-300 rounded overflow-hidden">
                                     {/* Header Row */}
-                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300"> {t("exercise")}</div>
+                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("exercise")}</div>
                                     <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("start")}</div>
                                     <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("end")}</div>
-                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("actions")}</div>
+                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300"></div>
 
                                     {/* Data Rows */}
                                     {courseDetails.exercises.map((ex, index) => (
                                         <React.Fragment key={ex.id}>
-                                            <div className={`px-4 py-2 border-t border-gray-200 justify-center content-center ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                            <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                                                 {ex.id} - {ex.title}
                                             </div>
                                             <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
@@ -318,17 +333,26 @@ const CourseDisplay: React.FC = () => {
                                                     className="w-full border border-gray-300 rounded-md p-2"
                                                 />
                                             </div>
-                                            <div className={`px-4 py-2 border-t border-gray-200 flex items-center  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                                <button
-                                                    onClick={() => handleUpdateExerciseDates(ex.id)}
-                                                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                                                >
-                                                    {t("save")}
-                                                </button>
+                                            <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                                                    <button
+                                                        onClick={() => handleUpdateExerciseDates(ex.id)}
+                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 w-full sm:w-auto"
+                                                    >
+                                                        {t("save")}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleExportCSV(ex.id)}
+                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 w-full sm:w-auto"
+                                                    >
+                                                        {t("exportCSV")}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </React.Fragment>
                                     ))}
                                 </div>
+
 
 
                             </div>

@@ -98,5 +98,6 @@
   "noCoursersWithSolutions": "Žiadne predmety s odovzdanými riešeniami.",
   "reloadSolutions": "Načítať riešenia znova",
   "submittedAt": "Odovzdané dňa",
-  "testResult": "Výsledok testu"
+  "testResult": "Výsledok testu",
+  "exportCSV": "CSV"
 }

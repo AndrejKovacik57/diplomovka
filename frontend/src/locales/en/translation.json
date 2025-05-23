@@ -98,5 +98,6 @@
   "noCoursersWithSolutions": "No courses with submitted solutions.",
   "reloadSolutions": "Reload Solutions",
   "submittedAt": "Submitted At",
-  "testResult": "Test result"
+  "testResult": "Test result",
+  "exportCSV": "CSV"
 }

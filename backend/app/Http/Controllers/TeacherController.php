@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Services\TeacherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
+
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class TeacherController extends Controller
@@ -57,4 +59,26 @@ class TeacherController extends Controller
             return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
         }
     }
+
+    public function exerciseSolutionsToCsv( $courseExerciseId): \Illuminate\Http\Response
+    {
+        $csvData = $this->teacherService->generateExerciseSolutionsCsv($courseExerciseId);
+
+        $handle = fopen('php://temp', 'r+');
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        $filename = "course_exercise_{$courseExerciseId}_solutions.csv";
+
+        return Response::make($content, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ]);
+    }
+
 }

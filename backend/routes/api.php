@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
     Route::apiResource('courses', CourseController::class);
     Route::apiResource('exercises', ExerciseController::class);
+    Route::get('/courses/exercises/{courseExercise}/solutions/export', [TeacherController::class, 'exerciseSolutionsToCsv']);
     Route::post('courses/{course}/exercises/{exercise}', [TeacherController::class, 'addExercise']);
     Route::patch('courses/exercises/dates', [TeacherController::class, 'updateDatesCourseExercise']);
     Route::get('courses/{courseId}/users/{userId}/exercises/solutions', [TeacherController::class, 'getUserSolutions']);

@@ -106,4 +106,56 @@ class TeacherService
 
         return $result;
     }
+    public function generateExerciseSolutionsCsv(string $courseExerciseId): array
+    {
+        $courseExercise = CourseExercise::query()->findOrFail($courseExerciseId);
+
+        $solutions = $courseExercise->solutions()
+            ->with(['user', 'testResults'])
+            ->get();
+
+        $csvData = [];
+
+        // Header row
+        $csvData[] = [
+            'User ID', 'First Name', 'Last Name', 'Solution ID',
+            'File Name', 'Test Status', 'Submitted At', 'Test Output',
+            'Test Name', 'Test Result', 'Test Message'
+        ];
+
+        foreach ($solutions as $solution) {
+            if ($solution->testResults->isEmpty()) {
+                $csvData[] = [
+                    $solution->user->id,
+                    $solution->user->first_name,
+                    $solution->user->last_name,
+                    $solution->id,
+                    $solution->file_name,
+                    $solution->test_status,
+                    $solution->created_at,
+                    $solution->test_output,
+                    '', '', '',
+                ];
+            } else {
+                foreach ($solution->testResults as $testResult) {
+                    $csvData[] = [
+                        $solution->user->id,
+                        $solution->user->first_name,
+                        $solution->user->last_name,
+                        $solution->id,
+                        $solution->file_name,
+                        $solution->test_status,
+                        $solution->created_at,
+                        $solution->test_output,
+                        $testResult->test_name,
+                        $testResult->status,
+                        $testResult->message,
+                    ];
+                }
+            }
+        }
+
+        return $csvData;
+    }
+
 }
