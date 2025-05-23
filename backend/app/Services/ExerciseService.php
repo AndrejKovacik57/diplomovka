@@ -25,8 +25,9 @@ class ExerciseService
                 'title' => $fields['title'],
                 'description' => $fields['description'],
             ]);
-
-            $this->handleImages($exercise, $fields);
+            if(isset($fields['images'])) {
+                $this->handleImages($exercise, $fields);
+            }
             $this->handleCodeFiles($exercise, $fields);
             $this->handleTestFile($exercise, $fields);
 
