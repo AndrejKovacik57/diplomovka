@@ -1,4 +1,5 @@
 import axios from "axios";
+import {toast} from "react-toastify";
 const axiosClient = axios.create({
     baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`
 })
@@ -31,7 +32,7 @@ axiosClient.interceptors.response.use(
                 break;
 
             case 404:
-                window.location.href = '/404';
+                // window.location.href = '/404';
                 break;
 
             case 422:
@@ -43,7 +44,8 @@ axiosClient.interceptors.response.use(
                 break;
 
             default:
-                console.warn("Unhandled error status:", response.status);
+                console.warn("Error status:" +  response.status + " text: "+response.statusText);
+                toast.error("Error status:" +  response.status + " text: "+response.statusText);
                 break;
         }
 

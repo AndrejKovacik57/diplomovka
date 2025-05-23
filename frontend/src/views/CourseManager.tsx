@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import CourseCreator from './CourseCreator';
 import CourseDisplay from './DisplayCourse';
+import {useTranslation} from "react-i18next";
 
 const CourseManager: React.FC = () => {
     const [mode, setMode] = useState<'create' | 'display'>('create');
+    const { t } = useTranslation();
 
     return (
         <div className="flex flex-col items-center px-4 py-8 md:py-12 bg-gray-100 min-h-screen">
@@ -18,13 +20,13 @@ const CourseManager: React.FC = () => {
                     className="flex-1 text-center py-3 font-medium z-10"
                     onClick={() => setMode('create')}
                 >
-                    Create Course
+                    {t('createCourse')}
                 </div>
                 <div
                     className="flex-1 text-center py-3 font-medium z-10"
                     onClick={() => setMode('display')}
                 >
-                    Display Course
+                    {t('displayCourse')}
                 </div>
             </div>
 

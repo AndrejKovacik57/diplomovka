@@ -64,14 +64,15 @@ class ExerciseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ExerciseRequest $request, Exercise $exercise)
+    public function update(ExerciseRequest $request, Exercise $exercise): JsonResponse
     {
         try {
 
             $fields = $request->validated();
             $exercise = $this->exerciseService->updateExercise($fields, $exercise);
+            $result = $this->exerciseService->getExerciseWithFiles($exercise->id);
 
-            return response()->json(['exercise' => $exercise], ResponseAlias::HTTP_OK);
+            return response()->json(['exercise' => $result], ResponseAlias::HTTP_OK);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);

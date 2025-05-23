@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axiosClient from "../axios-client.tsx";
 import { useStateContext } from "../contexts/ContextProvider.tsx";
+import {useTranslation} from "react-i18next";
 
 const Signup: React.FC = () => {
     const [firstName, setFirstName] = useState("");
@@ -10,6 +11,7 @@ const Signup: React.FC = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+    const { t } = useTranslation();
 
     const { setUser, setToken } = useStateContext();
 
@@ -37,7 +39,7 @@ const Signup: React.FC = () => {
         };
 
         axiosClient
-            .post("/signup", payLoad)
+            .post("/auth/signup", payLoad)
             .then(({ data }) => {
                 setUser(data.user);
                 setToken(data.token);
@@ -53,10 +55,10 @@ const Signup: React.FC = () => {
     return (
         <div className="flex flex-col items-center min-h-screen bg-gray-100 py-6 px-4">
             <div className="bg-white p-8 md:p-12 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+                <h2 className="text-2xl font-bold text-center mb-6">{t('signup')}</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-semibold mb-1">First Name</label>
+                        <label className="block text-sm font-semibold mb-1">{t('firstName')}</label>
                         <input
                             type="text"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -65,7 +67,7 @@ const Signup: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-1">Last Name</label>
+                        <label className="block text-sm font-semibold mb-1">{t('lastName')}</label>
                         <input
                             type="text"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -74,7 +76,7 @@ const Signup: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-1">Email</label>
+                        <label className="block text-sm font-semibold mb-1">{t('email')}</label>
                         <input
                             type="email"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -83,7 +85,7 @@ const Signup: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-1">Password</label>
+                        <label className="block text-sm font-semibold mb-1">{t('password')}</label>
                         <input
                             type="password"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -92,7 +94,7 @@ const Signup: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-1">Confirm Password</label>
+                        <label className="block text-sm font-semibold mb-1">{t('passwordConfirm')}</label>
                         <input
                             type="password"
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -104,7 +106,7 @@ const Signup: React.FC = () => {
                         type="submit"
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md transition"
                     >
-                        Register
+                        {t('signup')}
                     </button>
 
                     {Object.keys(errors).length > 0 && (
@@ -123,9 +125,9 @@ const Signup: React.FC = () => {
                 <div className="my-6 border-t border-gray-200"></div>
 
                 <p className="text-sm text-center mt-4">
-                    Already have an account?{' '}
+                    {t('hasGoogleAcc')}?{' '}
                     <Link to="/login" className="text-blue-600 hover:underline">
-                        Login
+                        {t('login')}
                     </Link>
                 </p>
             </div>

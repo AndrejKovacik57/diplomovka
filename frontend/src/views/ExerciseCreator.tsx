@@ -1,6 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import axiosClient from "../axios-client.tsx";
 import { toast } from 'react-toastify';
+import {useTranslation} from "react-i18next";
+import FileDropzone from "./FileDropZone.tsx";
+
+
 
 const ExerciseCreator: React.FC = () => {
     const [descriptionFieldValue, setDescriptionFieldValue] = useState("");
@@ -8,10 +12,8 @@ const ExerciseCreator: React.FC = () => {
     const [uploadedImage, setUploadedImage] = useState<File[]>([]);
     const [uploadedCodeFiles, setUploadedCodeFiles] = useState<File[]>([]);
     const [uploadedTestFile, setUploadedTestFile] = useState<File | null>(null);
+    const { t } = useTranslation();
 
-    const imageInputRef = useRef<HTMLInputElement>(null);
-    const codeInputRef = useRef<HTMLInputElement>(null);
-    const testInputRef = useRef<HTMLInputElement>(null);
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setDescriptionFieldValue(e.target.value);
@@ -19,21 +21,7 @@ const ExerciseCreator: React.FC = () => {
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitleFieldValue(e.target.value);
     };
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setUploadedImage(Array.from(e.target.files));
-        }
-    };
-    const handleCodeFilesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setUploadedCodeFiles(Array.from(e.target.files));
-        }
-    };
-    const handleTestFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            setUploadedTestFile(e.target.files[0]);
-        }
-    };
+
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -54,7 +42,7 @@ const ExerciseCreator: React.FC = () => {
             formData.append('testFile', uploadedTestFile);
         }
 
-        axiosClient.post('/exercise', formData, {
+        axiosClient.post('/exercises', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -74,10 +62,10 @@ const ExerciseCreator: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center py-6 px-4">
             <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl">
-                <h2 className="text-2xl font-semibold mb-6">Create Exercise</h2>
+                <h2 className="text-2xl font-semibold mb-6">{t('createExercise')}</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="title-field" className="block text-lg font-medium mb-1">Title:</label>
+                        <label htmlFor="title-field" className="block text-lg font-medium mb-1">{t('title')}:</label>
                         <input
                             id="title-field"
                             type="text"
@@ -87,7 +75,7 @@ const ExerciseCreator: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label htmlFor="description-field" className="block text-lg font-medium mb-1">Description:</label>
+                        <label htmlFor="description-field" className="block text-lg font-medium mb-1">{t('description')}:</label>
                         <textarea
                             id="description-field"
                             value={descriptionFieldValue}
@@ -97,55 +85,33 @@ const ExerciseCreator: React.FC = () => {
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-lg font-medium mb-1">Upload Picture/GIF:</label>
-                            <button type="button" onClick={() => imageInputRef.current?.click()} className="bg-blue-500 text-white px-4 py-2 rounded-md mb-2 w-full">Select Image Files</button>
-                            <input
-                                ref={imageInputRef}
-                                type="file"
-                                accept="image/*,image/gif"
-                                multiple
-                                onChange={handleImageUpload}
-                                className="hidden"
-                            />
-                            <ul className="text-sm text-gray-600 list-disc list-inside">
-                                {uploadedImage.map((file, index) => <li key={index}>{file.name}</li>)}
-                            </ul>
-                        </div>
-                        <div>
-                            <label className="block text-lg font-medium mb-1">Upload Code Files:</label>
-                            <button type="button" onClick={() => codeInputRef.current?.click()} className="bg-blue-500 text-white px-4 py-2 rounded-md mb-2 w-full">Select Code Files</button>
-                            <input
-                                ref={codeInputRef}
-                                type="file"
-                                accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                                multiple
-                                onChange={handleCodeFilesUpload}
-                                className="hidden"
-                            />
-                            <ul className="text-sm text-gray-600 list-disc list-inside">
-                                {uploadedCodeFiles.map((file, index) => <li key={index}>{file.name}</li>)}
-                            </ul>
-                        </div>
-                        <div>
-                            <label className="block text-lg font-medium mb-1">Test Files:</label>
-                            <button type="button" onClick={() => testInputRef.current?.click()} className="bg-blue-500 text-white px-4 py-2 rounded-md mb-2 w-full">Select Test Files</button>
-                            <input
-                                ref={testInputRef}
-                                type="file"
-                                accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.json,.php"
-                                onChange={handleTestFileUpload}
-                                className="hidden"
-                            />
-                            {uploadedTestFile && (
-                                <ul className="text-sm text-gray-600 list-disc list-inside">
-                                    <li>{uploadedTestFile.name}</li>
-                                </ul>
-                            )}
-                        </div>
+                        <FileDropzone
+                            label={t('uploadPictureGif')}
+                            accept={{ 'image/*': ['.jpg', '.jpeg', '.png', '.gif'] }}
+                            onDrop={(acceptedFiles) => setUploadedImage(acceptedFiles)}
+                            files={uploadedImage}
+                        />
+                        <FileDropzone
+                            label={t('uploadCodeFiles')}
+                            accept={{
+                                'text/plain': ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.json', '.php']
+                            }}
+                            onDrop={(acceptedFiles) => setUploadedCodeFiles(acceptedFiles)}
+                            files={uploadedCodeFiles}
+                        />
+                        <FileDropzone
+                            label={t('uploadTestFiles')}
+                            accept={{
+                                'text/plain': ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.json', '.php']
+                            }}
+                            multiple={false}
+                            onDrop={(acceptedFiles) => setUploadedTestFile(acceptedFiles[0])}
+                            files={uploadedTestFile ? [uploadedTestFile] : []}
+                        />
                     </div>
+
                     <div>
-                        <button type="submit" className="w-full bg-blue-600 text-white text-lg py-2 px-4 rounded-md hover:bg-blue-700 transition">Submit</button>
+                        <button type="submit" className="w-full bg-blue-600 text-white text-lg py-2 px-4 rounded-md hover:bg-blue-700 transition">{t('submit')}</button>
                     </div>
                 </form>
             </div>

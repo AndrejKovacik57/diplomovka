@@ -43,6 +43,24 @@ class AuthController extends Controller
         return response()->json($result, ResponseAlias::HTTP_OK);
     }
 
+    public function changePassword(Request $request): JsonResponse{
+        try{
+
+            $data = $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:8|confirmed',
+            ]);
+
+            $result = $this->authService->changePassword($data);
+            return response()->json(['message' => $result], ResponseAlias::HTTP_OK);
+
+        }
+        catch (\Exception $e){
+            return response()->json(['error' => $e->getMessage()], $e->getCode() ?: 500);
+        }
+
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $this->authService->logout($request->user());

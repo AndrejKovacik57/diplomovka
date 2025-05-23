@@ -25,7 +25,7 @@ class ExerciseRequest extends FormRequest
             'title' => 'required|max:255',
             'description' => 'required',
             'images' => 'nullable|array',
-            'images.*' => 'file|mimes:jpg,jpeg,png,gif|max:10240', // Set a reasonable max size
+            'images.*' => 'file|mimes:jpg,jpeg,png,gif|max:20480', // Set a reasonable max size
             'codeFiles' => 'nullable|array',
             'codeFiles.*' => 'file|max:10240',
             'testFile' => 'nullable|file|max:10240',

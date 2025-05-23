@@ -37,6 +37,14 @@ const TeacherHeader = () => {
                             Course
                         </Link>
                     </li>
+                    <li>
+                        <Link
+                            to="/settings"
+                            className="text-black px-4 py-2 rounded hover:bg-gray-100 hover:shadow-md transition"
+                        >
+                            Settings
+                        </Link>
+                    </li>
                 </ul>
             </nav>
             <div className="flex flex-col md:flex-row items-center gap-2">

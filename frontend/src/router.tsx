@@ -17,11 +17,12 @@ import DisplayCourse from "./views/DisplayCourse";
 import ExerciseManager from "./views/ExerciseManager";
 import CourseManager from "./views/CourseManager";
 import StudentExercises from "./views/StudentExercises.tsx";
-import Home from "./views/Home.tsx";
 import StudentExerciseDisplay from "./views/StudentExerciseDisplay.tsx";
 import Forbidden from "./views/Forbidden.tsx";
 import StudentSolutions from "./views/StudentSolutions.tsx";
 import EmailVerification from "./views/EmailVerification.tsx";
+import ForgotPassword from "./views/ForgotPassword.tsx";
+import ResetPassword from "./views/ResetPassword.tsx";
 
 function AppRouter() {
     const { user } = useStateContext();
@@ -29,22 +30,20 @@ function AppRouter() {
     const teacherRoutes = [
         { path: 'exerciseManager', element: <ExerciseManager /> },
         { path: 'courseManager', element: <CourseManager /> },
-        { path: '/', element: <Home/> },
     ];
 
     const studentRoutes = [
         { path: 'solution', element: <StudentSolutions /> },
-        { path: 'settings', element: <UserSettings /> },
         { path: 'exercises', element: <StudentExercises /> },
         { path: 'course/:courseId/exercise/:exerciseId',element: <StudentExerciseDisplay />},
-        { path: 'course/:courseId/exercise/:exerciseId',element: <StudentExerciseDisplay />},
-        { path: '/', element: <Home/> },
     ];
 
     const commonRoutes = [
         { path: 'course', element: <CourseCreator /> },
         { path: 'displayCourse', element: <DisplayCourse /> },
         { path: '/email/verify/:id/:hash', element: <EmailVerification /> },
+        { path: 'settings', element: <UserSettings /> },
+        { path: '/', element: <UserSettings/> },
 
     ];
 
@@ -66,6 +65,8 @@ function AppRouter() {
                     { path: 'login', element: <Login /> },
                     { path: 'signup', element: <Signup /> },
                     { path: 'auth/google', element: <GoogleCallBack /> },
+                    { path: '/forgot-password', element: <ForgotPassword /> },
+                    { path: '/reset-password/:token', element: <ResetPassword /> },
                     { path: '/', element: <Navigate to="/login" /> },
                     { path: '403', element: <Forbidden /> },
                     { path: '*', element: <NotFound /> },

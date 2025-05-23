@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosClient from "../axios-client.tsx";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner.tsx";
+import {useTranslation} from "react-i18next";
 
 
 interface TestResult {
@@ -48,15 +49,14 @@ const CourseDisplay: React.FC = () => {
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
     const [selectedUserUid, setSelectedUserUid] = useState<string | null>(null);
     const [selectedUserName, setSelectedUserName] = useState<{ firstName: string; lastName: string } | null>(null);
-    const [exerciseMessage, setExerciseMessage] = useState<string | null>(null);
-    const [exerciseErrorMessage, setErrorExerciseMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const { t } = useTranslation();
 
 
     useEffect(() => {
-        axiosClient.get("/exercise").then(({ data }) => {
+        axiosClient.get("/exercises").then(({ data }) => {
             if (courseDetails) {
                 const existingIds = new Set(courseDetails.exercises.map((e) => e.id));
                 setExercises(data.exercises.filter((ex: Exercise) => !existingIds.has(ex.id)));
@@ -67,7 +67,7 @@ const CourseDisplay: React.FC = () => {
     }, [courseDetails]);
 
     useEffect(() => {
-        axiosClient.get("/course").then(({ data }) => {
+        axiosClient.get("/courses").then(({ data }) => {
             setCourses(data.courses);
         });
     }, []);
@@ -94,24 +94,21 @@ const CourseDisplay: React.FC = () => {
     const handleExerciseSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         axiosClient
-            .post(`/course/${selectedCourseId}/exercise/${selectedExerciseId}`)
+            .post(`/courses/${selectedCourseId}/exercises/${selectedExerciseId}`)
             .then(({ data }) => {
-                setExerciseMessage(data.message);
                 setCourseDetails((prev) => prev && { ...prev, exercises: [...prev.exercises, data.exercise] });
-                toast.success("Exercise added!");
+                toast.success(t("exerciseAdded"));
             })
             .catch((error) => {
                 const response = error.response;
                 if (response) {
                     if (response.status === 409) {
-                        setErrorExerciseMessage("Exercise already added.");
+                        toast.error(t("exerciseAlreadyAdded"));
                     } else if (response.status === 422) {
-                        setErrorExerciseMessage("Validation error.");
+                        toast.error(t("validationError"));
                     } else {
-                        setErrorExerciseMessage("Unexpected error.");
+                        toast.error(t("unexpectedError"));
                     }
-                } else {
-                    setErrorExerciseMessage("Network error.");
                 }
             });
     };
@@ -129,16 +126,15 @@ const CourseDisplay: React.FC = () => {
         if (!exercise) return;
 
         axiosClient
-            .post("/courses/exercises/dates", {
+            .patch("/courses/exercises/dates", {
                 id,
                 start: exercise.start_datetime,
                 end: exercise.end_datetime,
             })
             .then(() => {
-                setExerciseMessage(`Exercise ${id} updated.`);
-                toast.success("Dates updated!");
+                toast.success(t("dateUpdate"));
             })
-            .catch(() => setErrorExerciseMessage("Error updating exercise."));
+            .catch(() => toast.error(t("unexpectedError")));
     };
 
     const handleUserClick = (id: number) => {
@@ -156,7 +152,7 @@ const CourseDisplay: React.FC = () => {
             .then(({ data, status }) => {
                 if (status === 204) {
                     setSelectedUserId(null);
-                    toast.error("No exercises.");
+                    toast.error(t("noExercises"));
                 } else {
                     setUserExercises(data);
                 }
@@ -170,7 +166,7 @@ const CourseDisplay: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col">
                         <label htmlFor="course" className="mb-2 font-semibold text-lg">
-                            Select a Course:
+                            {t("selectCourse")}:
                         </label>
                         <select
                             id="course"
@@ -190,21 +186,21 @@ const CourseDisplay: React.FC = () => {
                         type="submit"
                         className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
                     >
-                        View Details
+                        {t("viewDetails")}
                     </button>
                 </form>
 
                 {courseDetails && (
                     <>
                         <div className="mt-8">
-                            <h4 className="text-xl font-bold mb-4">Users</h4>
+                            <h4 className="text-xl font-bold mb-4">{t("users")}</h4>
 
                             <div className="grid grid-cols-4 text-sm border border-gray-300 rounded overflow-hidden">
                                 {/* Header Row */}
                                 <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">UID</div>
-                                <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">First Name</div>
-                                <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">Last Name</div>
-                                <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">In Course</div>
+                                <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("firstName")}</div>
+                                <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("lastName")}</div>
+                                <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("inCourse")}</div>
 
                                 {/* User Rows */}
                                 {courseDetails.uids
@@ -244,7 +240,7 @@ const CourseDisplay: React.FC = () => {
                                 {/* Page size selector on the left */}
                                 <div className="flex items-center space-x-2 mx-auto">
                                     <label htmlFor="itemsPerPage" className="font-medium whitespace-nowrap">
-                                        Users per page:
+                                        {t("usersPerPage")}:
                                     </label>
                                     <select
                                         id="itemsPerPage"
@@ -270,7 +266,7 @@ const CourseDisplay: React.FC = () => {
                                         disabled={currentPage === 1}
                                         className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
                                     >
-                                        Prev
+                                        {t("prev")}
                                     </button>
                                     <span className="px-2 py-1 whitespace-nowrap">Page {currentPage}</span>
                                     <button
@@ -282,7 +278,7 @@ const CourseDisplay: React.FC = () => {
                                         disabled={currentPage >= Math.ceil(courseDetails.uids.length / itemsPerPage)}
                                         className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
                                     >
-                                        Next
+                                        {t("exercises")}
                                     </button>
                                 </div>
                             </div>
@@ -292,13 +288,13 @@ const CourseDisplay: React.FC = () => {
 
                         {courseDetails.exercises.length > 0 && (
                             <div className="mt-8">
-                                <h4 className="text-xl font-bold mb-4">Exercises</h4>
+                                <h4 className="text-xl font-bold mb-4">{t("next")}</h4>
                                 <div className="grid grid-cols-4 text-sm border border-gray-300 rounded overflow-hidden">
                                     {/* Header Row */}
-                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">Exercise</div>
-                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">Start</div>
-                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">End</div>
-                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">Actions</div>
+                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300"> {t("exercise")}</div>
+                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("start")}</div>
+                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("end")}</div>
+                                    <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t("actions")}</div>
 
                                     {/* Data Rows */}
                                     {courseDetails.exercises.map((ex, index) => (
@@ -327,7 +323,7 @@ const CourseDisplay: React.FC = () => {
                                                     onClick={() => handleUpdateExerciseDates(ex.id)}
                                                     className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                                                 >
-                                                    Save
+                                                    {t("save")}
                                                 </button>
                                             </div>
                                         </React.Fragment>
@@ -339,7 +335,7 @@ const CourseDisplay: React.FC = () => {
 
                         )}
                         <div className="mt-8">
-                            <h4 className="text-xl font-bold mb-4">Add Exercise</h4>
+                            <h4 className="text-xl font-bold mb-4">{t("addExercise")}</h4>
                             <form onSubmit={handleExerciseSubmit} className="space-y-4">
                                 <select
                                     className="p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -357,11 +353,9 @@ const CourseDisplay: React.FC = () => {
                                     type="submit"
                                     className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
                                 >
-                                    Submit Exercise
+                                    {t("submit")}
                                 </button>
                             </form>
-                            {exerciseMessage && <div className="text-green-600 mt-2">{exerciseMessage}</div>}
-                            {exerciseErrorMessage && <div className="text-red-600 mt-2">{exerciseErrorMessage}</div>}
                         </div>
                     </>
                 )}
@@ -375,9 +369,9 @@ const CourseDisplay: React.FC = () => {
                                     {/* Inline Centered Name + UID */}
                                     <div className="flex gap-6">
                                         {selectedUserName && (
-                                            <p><strong>Name:</strong> {selectedUserName.firstName} {selectedUserName.lastName}</p>
+                                            <p><strong> {t("name")}:</strong> {selectedUserName.firstName} {selectedUserName.lastName}</p>
                                         )}
-                                        <p><strong>User UID:</strong> {selectedUserUid}</p>
+                                        <p><strong>{t("user")} UID:</strong> {selectedUserUid}</p>
                                     </div>
 
                                     {/* Close Button */}
@@ -400,7 +394,7 @@ const CourseDisplay: React.FC = () => {
                                         userExercises.map((exercise) =>
                                             exercise.solutions.map((solution: Solution) => (
                                                 <div key={solution.id} className="border border-gray-300 rounded-lg p-4 mb-4 bg-gray-50 ">
-                                                    <h4 className="font-bold mb-2">Solution for {exercise.title}</h4>
+                                                    <h4 className="font-bold mb-2">{t("solutionFor")} {exercise.title}</h4>
                                                     <div className="space-y-1">
                                                         <div className="flex flex-wrap gap-6">
                                                             <div><strong>Status:</strong> {solution.test_status}</div>
@@ -422,10 +416,10 @@ const CourseDisplay: React.FC = () => {
                                                             <div className="grid grid-cols-2">
                                                                 {/* Header row */}
                                                                 <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
-                                                                    Test Name
+                                                                    {t("solutionFor")}
                                                                 </div>
                                                                 <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
-                                                                    Status
+                                                                    {t("status")}
                                                                 </div>
 
                                                                 {/* Data rows */}
@@ -442,14 +436,14 @@ const CourseDisplay: React.FC = () => {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <p>No test results found.</p>
+                                                        <p>{t("noTestFound")}</p>
                                                     )}
 
                                                 </div>
                                             ))
                                         )
                                     ) : (
-                                        <p>No solutions found.</p>
+                                        <p>{t("noSolutionFound")}</p>
                                     )
                                 )}
                             </div>

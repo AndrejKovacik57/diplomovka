@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import ExerciseCreator from './ExerciseCreator';
 import ExerciseDisplay from './ExerciseDisplay';
+import {useTranslation} from "react-i18next";
 
 const ExerciseManager: React.FC = () => {
     const [mode, setMode] = useState<'create' | 'display'>('create');
+    const { t } = useTranslation();
 
     return (
         <div className="flex flex-col items-center px-4 py-8 md:py-12 bg-gray-100 min-h-screen">
@@ -18,13 +20,13 @@ const ExerciseManager: React.FC = () => {
                     className="flex-1 text-center py-3 font-medium z-10"
                     onClick={() => setMode('create')}
                 >
-                    Create Exercise
+                    {t('createExercise')}
                 </div>
                 <div
                     className="flex-1 text-center py-3 font-medium z-10"
                     onClick={() => setMode('display')}
                 >
-                    Display Exercise
+                    {t('displayExercise')}
                 </div>
             </div>
 

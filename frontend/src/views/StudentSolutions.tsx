@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosClient from "../axios-client";
 import { useStateContext } from "../contexts/ContextProvider";
 import Spinner from "../components/Spinner.tsx";
+import {useTranslation} from "react-i18next";
 
 interface TestResult {
     id: number;
@@ -38,8 +39,9 @@ const StudentSolutions: React.FC = () => {
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const selectedCourse = courses.find((course) => course.id === selectedCourseId);
+    const { t } = useTranslation();
 
-    useEffect(() => {
+    const loadSolutions = () => {
         if (user) {
             setLoading(true);
             axiosClient
@@ -53,7 +55,11 @@ const StudentSolutions: React.FC = () => {
                     console.error("Error loading user solutions:", err);
                 });
         }
-    }, [user]);
+    };
+
+    useEffect(() => {
+        loadSolutions();
+    }, [loadSolutions, user]);
 
     if (loading) {
         return (
@@ -68,27 +74,39 @@ const StudentSolutions: React.FC = () => {
     return (
         <div className="flex flex-col items-center bg-gray-100 py-8 px-4 min-h-screen">
             <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-5xl">
-                <h1 className="text-3xl font-bold mb-6">Your Solutions</h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">{t('yourSolutions')}</h1>
+
+                </div>
 
                 {courses.length === 0 ? (
-                    <p>No courses with submitted solutions.</p>
+                    <p>{t('noCoursersWithSolutions')}</p>
                 ) : (
                     <>
                         <div className="mb-6">
-                            <label htmlFor="course-select" className="block font-semibold mb-2">Select a course:</label>
+                            <label htmlFor="course-select" className="block font-semibold mb-2">{t('selectCourse')}:</label>
                             <select
                                 id="course-select"
                                 value={selectedCourseId ?? ""}
                                 onChange={(e) => setSelectedCourseId(Number(e.target.value))}
                                 className="w-full border border-gray-300 rounded-lg p-2"
                             >
-                                <option value="" disabled>Select a course</option>
+                                <option value="" disabled>{t('selectCourse')}</option>
                                 {courses.map((course) => (
                                     <option key={course.id} value={course.id}>
                                         {course.name}
                                     </option>
                                 ))}
                             </select>
+
+                        </div>
+                        <div className="mb-6">
+                            <button
+                                onClick={loadSolutions}
+                                className="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow"
+                            >
+                                {t('reloadSolutions')}
+                            </button>
                         </div>
 
                         {selectedCourse && (
@@ -99,18 +117,16 @@ const StudentSolutions: React.FC = () => {
                                             <div key={solution.id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
                                                 <h4 className="text-lg font-semibold mb-2">Solution for {exercise.title}</h4>
                                                 <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-2 md:space-y-0">
-                                                    <div><strong>Status:</strong> {solution.test_status}</div>
-                                                    <div><strong>Submitted At:</strong> {new Date(solution.submitted_at).toLocaleString()}</div>
-                                                    <div><strong>Test result:</strong> {solution.test_output}</div>
+                                                    <div><strong> {t('status')}:</strong> {solution.test_status}</div>
+                                                    <div><strong>{t('submittedAt')}:</strong> {new Date(solution.submitted_at).toLocaleString()}</div>
+                                                    <div><strong>{t('testResult')}:</strong> {solution.test_output}</div>
                                                 </div>
 
                                                 {solution.test_results.length > 0 ? (
                                                     <div className="mt-4 grid grid-cols-2 text-sm border border-gray-300 rounded overflow-hidden">
-                                                        {/* Header Row */}
-                                                        <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">Test Name</div>
-                                                        <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300 text-right">Status</div>
+                                                        <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t('testName')}</div>
+                                                        <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300 text-right">{t('status')}</div>
 
-                                                        {/* Result Rows */}
                                                         {solution.test_results.map((result, index) => (
                                                             <React.Fragment key={result.id}>
                                                                 <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
@@ -123,9 +139,8 @@ const StudentSolutions: React.FC = () => {
                                                         ))}
                                                     </div>
                                                 ) : (
-                                                    <p className="text-gray-500 mt-2">No test results found.</p>
+                                                    <p className="text-gray-500 mt-2">{t('noTestFound')}</p>
                                                 )}
-
                                             </div>
                                         ))}
                                     </div>

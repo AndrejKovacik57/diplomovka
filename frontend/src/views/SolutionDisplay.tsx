@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosClient from "../axios-client.tsx";
 
-const ExerciseDisplay: React.FC = () => {
+const SolutionDisplay: React.FC = () => {
     const [solutions, setSolutions] = useState<{ id: number; file_name: string;}[]>([]);
     const [selectedolutionId, setSelectedSolutionId] = useState<number | null>(null);
     const [output, setOutput] = useState<string | null>(null);
@@ -71,4 +71,4 @@ const ExerciseDisplay: React.FC = () => {
     );
 };
 
-export default ExerciseDisplay;
+export default SolutionDisplay;

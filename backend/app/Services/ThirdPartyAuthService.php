@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CourseEnrollment;
 use App\Models\User;
+use Exception;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,12 +18,15 @@ class ThirdPartyAuthService
         return Socialite::driver('google')->stateless()->redirect()->getTargetUrl();
     }
 
+    /**
+     * @throws Exception
+     */
     public function handleGoogleCallback(): array
     {
         try {
             $socialiteUser = Socialite::driver('google')->stateless()->user();
         } catch (ClientException $e) {
-            abort(ResponseAlias::HTTP_UNPROCESSABLE_ENTITY, 'Invalid credentials provided.');
+            throw new Exception('Invalid credentials provided.', ResponseAlias::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return DB::transaction(function () use ($socialiteUser) {
@@ -58,6 +62,9 @@ class ThirdPartyAuthService
         });
     }
 
+    /**
+     * @throws Exception
+     */
     public function handleAISLogin(array $credentials): array
     {
         $ldapuid = $credentials['username'];
@@ -68,14 +75,14 @@ class ThirdPartyAuthService
         $ldapconn = ldap_connect("ldap.stuba.sk");
 
         if (!$ldapconn) {
-            abort(ResponseAlias::HTTP_INTERNAL_SERVER_ERROR, 'Could not connect to LDAP server.');
+            throw new Exception('Could not connect to LDAP server.', ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
         $ldapbind = ldap_bind($ldapconn, $ldaprdn, $ldappass);
 
         if (!$ldapbind) {
-            abort(ResponseAlias::HTTP_FORBIDDEN, 'LDAP bind failed.');
+            throw new Exception('LDAP bind failed.', ResponseAlias::HTTP_FORBIDDEN);
         }
 
         $filter = "(uid=$ldapuid)";
@@ -83,7 +90,7 @@ class ThirdPartyAuthService
         $entries = ldap_get_entries($ldapconn, $result);
 
         if (!isset($entries[0])) {
-            abort(ResponseAlias::HTTP_NOT_FOUND, 'No LDAP entries found.');
+            throw new Exception('No LDAP entries found.', ResponseAlias::HTTP_NOT_FOUND);
         }
 
         $userData = [];

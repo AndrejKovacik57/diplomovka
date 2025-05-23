@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class StudentService
@@ -42,21 +43,24 @@ class StudentService
         return $result;
     }
 
+    /**
+     * @throws Exception
+     */
     public function getUserExercise(User $user, int $courseId, int $exerciseId): array
     {
         if (!$user->courses()->where('courses.id', $courseId)->exists()) {
-            abort(ResponseAlias::HTTP_FORBIDDEN, 'User not enrolled in course');
+            throw new Exception('User not enrolled in course', ResponseAlias::HTTP_FORBIDDEN);
         }
 
         $course = Course::with(['exercises' => fn ($q) => $q->where('exercises.id', $exerciseId)])
             ->find($courseId);
 
         if (!$course) {
-            abort(ResponseAlias::HTTP_NOT_FOUND, 'Course does not exist');
+            throw new Exception('Course does not exist', ResponseAlias::HTTP_NOT_FOUND);
         }
         $exercise = $course->exercises->firstWhere('id', $exerciseId);
         if (!$exercise) {
-            abort(ResponseAlias::HTTP_NOT_FOUND, 'Exercise does not exist');
+            throw new Exception('Exercise does not exist', ResponseAlias::HTTP_NOT_FOUND);
         }
 
         $now = Carbon::now();
@@ -64,7 +68,7 @@ class StudentService
         $end = $exercise->pivot->end;
 
         if (($start && $now->lt($start)) || ($end && $now->gt($end))) {
-            abort(ResponseAlias::HTTP_FORBIDDEN, 'Exercise is not currently available');
+            throw new Exception('Exercise is not currently available', ResponseAlias::HTTP_FORBIDDEN);
         }
 
         return $this->exerciseService->getExerciseWithFiles($exerciseId);

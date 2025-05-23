@@ -2,39 +2,48 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextProvider";
 import axiosClient from "../axios-client";
+import {useTranslation} from "react-i18next";
 
 const ResponsiveHeader = ({ role }: { role: "guest" | "student" | "teacher" }) => {
     const { user, setUser, setToken } = useStateContext();
     const [menuOpen, setMenuOpen] = useState(false);
+    const { t, i18n } = useTranslation();
 
     const onLogout = (ev: React.MouseEvent<HTMLButtonElement>) => {
         ev.preventDefault();
-        axiosClient.post("/logout").then(() => {
+        axiosClient.post("/auth/logout").then(() => {
             setUser(null);
             setToken(null);
         });
     };
 
+    const changeLanguage = (lng: string) => {
+        i18n.changeLanguage(lng);
+    };
+
     const navLinks = {
         guest: [
-            { path: "/login", label: "Login" },
-            { path: "/signup", label: "Sign Up" },
+            { path: "/login", label: t('login') },
+            { path: "/signup", label: t('signup') },
         ],
         student: [
-            { path: "/exercises", label: "Exercises" },
-            { path: "/solution", label: "Solutions" },
-            { path: "/settings", label: "Settings" },
+            { path: "/exercises", label: t('exercises') },
+            { path: "/solution", label: t('solutions') },
+            { path: "/settings", label: t('settings') },
         ],
         teacher: [
-            { path: "/exerciseManager", label: "Exercise" },
-            { path: "/courseManager", label: "Course" },
+            { path: "/exerciseManager", label: t('exercise') },
+            { path: "/courseManager", label: t('course') },
+            { path: "/settings", label: t('settings') },
         ],
     };
 
     return (
         <header className={`shadow-md bg-white px-4 py-3 flex justify-between items-center min-w-[400px]`}>
 
-        <Link to="/" className="text-xl font-bold">MyApp</Link>
+        <Link to="/" className="text-xl font-bold">{import.meta.env.VITE_APP_NAME}</Link>
+            {/* Jazykové prepínače */}
+
 
             {/* Burger Button */}
             <button
@@ -72,8 +81,14 @@ const ResponsiveHeader = ({ role }: { role: "guest" | "student" | "teacher" }) =
                             </Link>
                         </li>
                     ))}
+
                     {user && (
                         <li className="md:hidden">
+                            <div className="hidden md:flex gap-2 items-center">
+                                <button onClick={() => changeLanguage("sk")} className="text-2xl px-2 py-1 border-0">🇸🇰</button>
+                                <button onClick={() => changeLanguage("en")} className="text-2xl px-2 py-1 border-0">🇬🇧</button>
+
+                            </div>
                             <button
                                 onClick={(e) => {
                                     onLogout(e);
@@ -81,23 +96,37 @@ const ResponsiveHeader = ({ role }: { role: "guest" | "student" | "teacher" }) =
                                 }}
                                 className="bg-white border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-100 hover:shadow-md transition block w-full text-center"
                             >
-                                Logout
+                                {t('logout')}
                             </button>
+
                         </li>
+
                     )}
                 </ul>
+                {!user && (
+                    <div className="hidden md:flex gap-2 items-center">
+                        <button onClick={() => changeLanguage("sk")} className="text-2xl px-2 py-1 border-0">🇸🇰</button>
+                        <button onClick={() => changeLanguage("en")} className="text-2xl px-2 py-1 border-0">🇬🇧</button>
 
+                    </div>
+                )}
             </nav>
 
             {user && (
                 <div className="hidden md:flex items-center gap-4">
                     <span className="text-sm font-medium">Hello {user.first_name}</span>
+                    <div className="hidden md:flex gap-2 items-center">
+                        <button onClick={() => changeLanguage("sk")} className="text-2xl px-2 py-1 border-0">🇸🇰</button>
+                        <button onClick={() => changeLanguage("en")} className="text-2xl px-2 py-1 border-0">🇬🇧</button>
+
+                    </div>
                     <button
                         onClick={onLogout}
                         className="bg-white border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-100 hover:shadow-md transition"
                     >
-                        Logout
+                        {t('logout')}
                     </button>
+
                 </div>
             )}
 

@@ -83,16 +83,49 @@ class ExerciseService
     public function updateExercise(array $fields, Exercise $exercise): Exercise
     {
         return DB::transaction(function () use ($fields, $exercise) {
-            foreach ($fields['pictures'] as $pictureFile) {
-                $filePath = $pictureFile->store('pictures', 'local');
-                $exercise->images()->create(['file_path' => $filePath]);
+
+            // 1. Update title and description
+            $exercise->update([
+                'title' => $fields['title'],
+                'description' => $fields['description'],
+            ]);
+
+            // 2. Replace images if provided
+            if (!empty($fields['images'])) {
+                // Delete existing image records and files
+                foreach ($exercise->images as $image) {
+                    Storage::disk('local')->delete($image->image_path);
+                    $image->delete();
+                }
+
+                $this->handleImages($exercise, $fields);
             }
 
-            $exercise->update($fields);
+            // 3. Replace code files if provided
+            if (!empty($fields['codeFiles'])) {
+                foreach ($exercise->files as $file) {
+                    Storage::disk('local')->delete($file->file_path);
+                    $file->delete();
+                }
 
-            return $exercise;
+                $this->handleCodeFiles($exercise, $fields);
+            }
+
+            // 4. Replace test file if provided
+            if (!empty($fields['testFile'])) {
+                // Delete existing test file if exists
+                if ($exercise->test) {
+                    Storage::disk('local')->delete($exercise->test->file_path);
+                    $exercise->test()->delete();
+                }
+
+                $this->handleTestFile($exercise, $fields);
+            }
+            $exercise->save();
+            return $exercise->fresh();
         });
     }
+
     public function getExerciseWithFiles($exerciseId): array
     {
         $exercise = Exercise::with(['images', 'files'])->findOrFail($exerciseId);

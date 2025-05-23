@@ -5,19 +5,23 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\CourseExercise;
 use App\Models\Exercise;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 
 class TeacherService
 {
+    /**
+     * @throws Exception
+     */
     public function addExerciseToCourse(string $courseId, string $exerciseId): array
     {
         $course = Course::query()->findOrFail($courseId);
         $exercise = Exercise::query()->findOrFail($exerciseId);
 
         if ($course->exercises->contains($exerciseId)) {
-            abort(ResponseAlias::HTTP_FORBIDDEN, 'Exercise already in course');
+            throw new Exception('Exercise already in course', ResponseAlias::HTTP_FORBIDDEN);
         }
 
         $course->exercises()->syncWithoutDetaching($exercise->id);
@@ -32,6 +36,9 @@ class TeacherService
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function updateCourseExerciseDates(array $validated): void
     {
         $courseExercise = CourseExercise::query()->findOrFail($validated['id']);
@@ -41,7 +48,7 @@ class TeacherService
         ]);
 
         if (!$courseExercise->isDirty()) {
-            abort(ResponseAlias::HTTP_NOT_MODIFIED, 'No changes detected');
+            throw new Exception('No changes detected', ResponseAlias::HTTP_NOT_MODIFIED);
 
         }
 

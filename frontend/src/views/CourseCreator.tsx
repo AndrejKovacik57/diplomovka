@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import axiosClient from "../axios-client.tsx";
 import { toast } from "react-toastify";
+import {useTranslation} from "react-i18next";
 
 const CourseCreator: React.FC = () => {
     const [nameFieldValue, setNameFieldValue] = useState("");
@@ -8,6 +9,8 @@ const CourseCreator: React.FC = () => {
     const [year, setYear] = useState<number>(new Date().getFullYear());
     const [uploadedCSVFiles, setUploadedCSVFiles] = useState<File[]>([]);
     const csvInputRef = useRef<HTMLInputElement>(null);
+    const { t } = useTranslation();
+
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNameFieldValue(e.target.value);
@@ -40,7 +43,7 @@ const CourseCreator: React.FC = () => {
         });
 
         axiosClient
-            .post("/course", formData, {
+            .post("/courses", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -60,12 +63,12 @@ const CourseCreator: React.FC = () => {
     return (
         <div className="flex justify-center p-4 md:p-8">
             <div className="w-full max-w-6xl bg-white rounded-xl shadow-md p-6 md:p-12">
-                <h2 className="text-2xl font-semibold mb-6 text-center">Create Course</h2>
+                <h2 className="text-2xl font-semibold mb-6 text-center">{t('createCourse')}</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Title */}
                     <div>
                         <label htmlFor="name-field" className="block text-lg font-semibold mb-2">
-                            Title:
+                            {t('title')}:
                         </label>
                         <input
                             id="name-field"
@@ -79,7 +82,7 @@ const CourseCreator: React.FC = () => {
                     {/* Semester */}
                     <div>
                         <label htmlFor="semester-field" className="block text-lg font-semibold mb-2">
-                            Semester:
+                            {t('semester')}:
                         </label>
                         <select
                             id="semester-field"
@@ -87,15 +90,15 @@ const CourseCreator: React.FC = () => {
                             onChange={handleSemesterChange}
                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                         >
-                            <option value="summer">Summer</option>
-                            <option value="winter">Winter</option>
+                            <option value="summer">{t('summer')}</option>
+                            <option value="winter">{t('semester')}</option>
                         </select>
                     </div>
 
                     {/* Year */}
                     <div>
                         <label htmlFor="year-field" className="block text-lg font-semibold mb-2">
-                            Year:
+                            {t('year')}:
                         </label>
                         <input
                             id="year-field"
@@ -110,13 +113,13 @@ const CourseCreator: React.FC = () => {
 
                     {/* CSV Upload */}
                     <div>
-                        <label className="block text-lg font-semibold mb-2">CSV File:</label>
+                        <label className="block text-lg font-semibold mb-2">{t('csvFile')}:</label>
                         <button
                             type="button"
                             onClick={() => csvInputRef.current?.click()}
                             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-sm"
                         >
-                            Select CSV File
+                            {t('selectCsvFile')}
                         </button>
                         <input
                             ref={csvInputRef}
@@ -141,7 +144,7 @@ const CourseCreator: React.FC = () => {
                             type="submit"
                             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-md text-lg font-semibold transition duration-200"
                         >
-                            Submit
+                            {t('submit')}
                         </button>
                     </div>
                 </form>
