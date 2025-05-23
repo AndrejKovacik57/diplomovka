@@ -70,5 +70,3 @@ docker compose exec backend php artisan migrate
 
 Ǔdaje od učiteľa na servery sú ucitel@ucitel.sk, Heslo123!
 Cez smtp sa dá nastaviť mailer.
-
-✅ Projekt by mal byť teraz úspešne nasadený a pripravený na používanie.
