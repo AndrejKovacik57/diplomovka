@@ -42,8 +42,6 @@ const ResponsiveHeader = ({ role }: { role: "guest" | "student" | "teacher" }) =
         <header className={`shadow-md bg-white px-4 py-3 flex justify-between items-center min-w-[400px]`}>
 
         <Link to="/" className="text-xl font-bold">{import.meta.env.VITE_APP_NAME}</Link>
-            {/* Jazykové prepínače */}
-
 
             {/* Burger Button */}
             <button
@@ -83,25 +81,23 @@ const ResponsiveHeader = ({ role }: { role: "guest" | "student" | "teacher" }) =
                     ))}
 
                     {user && (
-                        <li className="md:hidden">
-                            <div className="hidden md:flex gap-2 items-center">
-                                <button onClick={() => changeLanguage("sk")} className="text-2xl px-2 py-1 border-0">🇸🇰</button>
-                                <button onClick={() => changeLanguage("en")} className="text-2xl px-2 py-1 border-0">🇬🇧</button>
-
-                            </div>
+                        <li className="md:hidden flex flex-col items-center gap-2">
                             <button
                                 onClick={(e) => {
                                     onLogout(e);
-                                    setMenuOpen(false); // Close menu after logout
+                                    setMenuOpen(false);
                                 }}
-                                className="bg-white border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-100 hover:shadow-md transition block w-full text-center"
+                                className="bg-white border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-100 hover:shadow-md transition w-full text-center"
                             >
                                 {t('logout')}
                             </button>
-
+                            <div className="flex gap-2 items-center">
+                                <button onClick={() => changeLanguage("sk")} className="text-2xl px-2 py-1 border-0">🇸🇰</button>
+                                <button onClick={() => changeLanguage("en")} className="text-2xl px-2 py-1 border-0">🇬🇧</button>
+                            </div>
                         </li>
-
                     )}
+
                 </ul>
                 {!user && (
                     <div className="hidden md:flex gap-2 items-center">

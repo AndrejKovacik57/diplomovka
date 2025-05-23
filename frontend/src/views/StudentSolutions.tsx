@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import axiosClient from "../axios-client";
 import { useStateContext } from "../contexts/ContextProvider";
 import Spinner from "../components/Spinner.tsx";
@@ -41,7 +41,7 @@ const StudentSolutions: React.FC = () => {
     const selectedCourse = courses.find((course) => course.id === selectedCourseId);
     const { t } = useTranslation();
 
-    const loadSolutions = () => {
+    const loadSolutions = useCallback(() => {
         if (user) {
             setLoading(true);
             axiosClient
@@ -55,11 +55,11 @@ const StudentSolutions: React.FC = () => {
                     console.error("Error loading user solutions:", err);
                 });
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         loadSolutions();
-    }, [loadSolutions, user]);
+    }, [user]);
 
     if (loading) {
         return (

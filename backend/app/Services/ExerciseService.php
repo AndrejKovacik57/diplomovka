@@ -6,6 +6,7 @@ use App\Models\Exercise;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ExerciseService
 {
@@ -23,7 +24,6 @@ class ExerciseService
             $exercise = Exercise::query()->create([
                 'title' => $fields['title'],
                 'description' => $fields['description'],
-                'user_id' => Auth::id(),
             ]);
 
             $this->handleImages($exercise, $fields);
@@ -84,15 +84,12 @@ class ExerciseService
     {
         return DB::transaction(function () use ($fields, $exercise) {
 
-            // 1. Update title and description
             $exercise->update([
                 'title' => $fields['title'],
                 'description' => $fields['description'],
             ]);
 
-            // 2. Replace images if provided
-            if (!empty($fields['images'])) {
-                // Delete existing image records and files
+            if (isset($fields['images'])) {
                 foreach ($exercise->images as $image) {
                     Storage::disk('local')->delete($image->image_path);
                     $image->delete();
@@ -101,8 +98,7 @@ class ExerciseService
                 $this->handleImages($exercise, $fields);
             }
 
-            // 3. Replace code files if provided
-            if (!empty($fields['codeFiles'])) {
+            if (isset($fields['codeFiles'])) {
                 foreach ($exercise->files as $file) {
                     Storage::disk('local')->delete($file->file_path);
                     $file->delete();
@@ -111,9 +107,7 @@ class ExerciseService
                 $this->handleCodeFiles($exercise, $fields);
             }
 
-            // 4. Replace test file if provided
-            if (!empty($fields['testFile'])) {
-                // Delete existing test file if exists
+            if (isset($fields['testFile'])) {
                 if ($exercise->test) {
                     Storage::disk('local')->delete($exercise->test->file_path);
                     $exercise->test()->delete();
