@@ -65,13 +65,19 @@ class RunSolutionTests implements ShouldQueue
         $test_file_path = $this->copyFile($test_name, $test_path);
 
         try {
-            $ext = pathinfo($this->solution->file_path, PATHINFO_EXTENSION);
-            Log::info("Detected extension: $ext");
+            $solutionExt = pathinfo($this->solution->file_path, PATHINFO_EXTENSION);
+            $testExt = pathinfo($test->file_path, PATHINFO_EXTENSION);
 
-            $binary = match ($ext) {
+            Log::info("Detected solution extension: $solutionExt, test extension: $testExt");
+
+            if ($solutionExt !== $testExt) {
+                throw new Exception("Mismatched extensions: Solution is .$solutionExt but test is .$testExt");
+            }
+
+            $binary = match ($solutionExt) {
                 'php' => '/usr/local/bin/php',
-                'js' => '/usr/local/bin/node',
-                default => throw new Exception("Unsupported extension: $ext"),
+                'js' => '/usr/bin/node',
+                default => throw new Exception("Unsupported extension: $solutionExt"),
             };
 
 
@@ -81,8 +87,8 @@ class RunSolutionTests implements ShouldQueue
                 '--quiet',
                 '--mode', 'o',
                 '--chroot', '/sandbox',
-                '--time_limit', '5',
-                '--rlimit_as', '128',
+                '--time_limit', '10',
+                '--rlimit_as', 'max',
                 '--disable_clone_newnet',
                 '--disable_proc',
                 '--', $binary, "/test/{$test_name}"
