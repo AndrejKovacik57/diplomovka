@@ -93,9 +93,7 @@ const ExerciseCreator: React.FC = () => {
                         />
                         <FileDropzone
                             label={t('uploadCodeFiles')}
-                            accept={{
-                                'text/plain': ['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.cpp', '.json', '.php']
-                            }}
+                            accept={{}}
                             onDrop={(acceptedFiles) => setUploadedCodeFiles(acceptedFiles)}
                             files={uploadedCodeFiles}
                         />
