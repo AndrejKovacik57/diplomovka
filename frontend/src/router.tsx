@@ -1,4 +1,3 @@
-// router.tsx
 import {
     createBrowserRouter,
     Navigate,
@@ -26,7 +25,8 @@ import ResetPassword from "./views/ResetPassword.tsx";
 
 function AppRouter() {
     const { user } = useStateContext();
-    console.log("AppRouter: user =", user);
+    const isAuthenticated = !!user;
+
     const teacherRoutes = [
         { path: 'exerciseManager', element: <ExerciseManager /> },
         { path: 'courseManager', element: <CourseManager /> },
@@ -35,19 +35,16 @@ function AppRouter() {
     const studentRoutes = [
         { path: 'solution', element: <StudentSolutions /> },
         { path: 'exercises', element: <StudentExercises /> },
-        { path: 'course/:courseId/exercise/:exerciseId',element: <StudentExerciseDisplay />},
+        { path: 'course/:courseId/exercise/:exerciseId', element: <StudentExerciseDisplay /> },
     ];
 
     const commonRoutes = [
         { path: 'course', element: <CourseCreator /> },
         { path: 'displayCourse', element: <DisplayCourse /> },
-        { path: '/email/verify/:id/:hash', element: <EmailVerification /> },
+        { path: 'email/verify/:id/:hash', element: <EmailVerification /> },
         { path: 'settings', element: <UserSettings /> },
-        { path: '/', element: <UserSettings/> },
-
+        { index: true, element: <UserSettings /> },
     ];
-
-    const isAuthenticated = !!user;
 
     const router = createBrowserRouter([
         {
@@ -65,15 +62,13 @@ function AppRouter() {
                     { path: 'login', element: <Login /> },
                     { path: 'signup', element: <Signup /> },
                     { path: 'auth/google', element: <GoogleCallBack /> },
-                    { path: '/forgot-password', element: <ForgotPassword /> },
-                    { path: '/reset-password/:token', element: <ResetPassword /> },
-                    { path: '/', element: <Navigate to="/login" /> },
-                    { path: '403', element: <Forbidden /> },
-                    { path: '*', element: <NotFound /> },
+                    { path: 'forgot-password', element: <ForgotPassword /> },
+                    { path: 'reset-password/:token', element: <ResetPassword /> },
+                    { index: true, element: <Navigate to="/login" /> }, // Redirect / to /login
+                    { path: '*', element: <Navigate to="/login" /> },  // Redirect unknown to /login
                 ],
         },
     ]);
-
 
     return <RouterProvider router={router} />;
 }
