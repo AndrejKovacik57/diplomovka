@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     volumes:
-      - ./frontend/dist:/usr/share/nginx/html
+      - ./frontend/dist:/usr/share/nginx/html  # This is now correct
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "80:80"
@@ -15,7 +15,6 @@ services:
     networks:
       - app-network
     restart: always
-
 
   backend:
     build:
