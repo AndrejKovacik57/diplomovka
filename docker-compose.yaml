@@ -10,6 +10,8 @@ services:
       - "9000:9000"
     volumes:
       - ./backend/:/var/www/html/
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - db
 
