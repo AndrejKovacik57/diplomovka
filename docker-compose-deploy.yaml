@@ -45,8 +45,6 @@ services:
       - db-data:/var/lib/postgresql/data
     networks:
       - app-network
-    extra_hosts:
-      - "pgadmin:host.docker.internal"
     restart: always
 
   pgadmin:
