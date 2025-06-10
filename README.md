@@ -68,6 +68,5 @@ docker compose exec backend php artisan migrate
 > 🛠 PgAdmin beží na: [http://node20.webte.fei.stuba.sk/pgadmin/login?next=/](http://node20.webte.fei.stuba.sk/pgadmin/login?next=/)
 ---
 
-Ǔdaje od učiteľa na servery sú ucitel@ucitel.sk, Heslo123!
-Údaje pre žiaka na servery sú student@student.sk, Heslo123!
+
 Cez smtp sa dá nastaviť mailer.

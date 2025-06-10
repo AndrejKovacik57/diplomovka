@@ -99,5 +99,9 @@
   "reloadSolutions": "Reload Solutions",
   "submittedAt": "Submitted At",
   "testResult": "Test result",
-  "exportCSV": "CSV"
+  "exportCSV": "CSV",
+  "testDetails": "Tests inputs and outputs",
+  "input": "Input",
+  "expectedOutput": "Expected output",
+  "actualOutput": "Actual output"
 }

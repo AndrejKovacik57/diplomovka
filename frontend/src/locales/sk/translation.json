@@ -99,5 +99,9 @@
   "reloadSolutions": "Načítať riešenia znova",
   "submittedAt": "Odovzdané dňa",
   "testResult": "Výsledok testu",
-  "exportCSV": "CSV"
+  "exportCSV": "CSV",
+  "testDetails": "Vstupy a výstupy testov",
+  "input": "Vstup",
+  "expectedOutput": "Očakávaný výstup",
+  "actualOutput": "Získaný výstup"
 }

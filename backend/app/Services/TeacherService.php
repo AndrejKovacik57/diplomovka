@@ -96,7 +96,13 @@ class TeacherService
                         'id' => $r->id,
                         'test_name' => $r->test_name,
                         'status' => $r->status,
-                        'message' => $r->message,
+                        'outputs' => $r->outputs->map(fn ($o) => [
+                            'id' => $o->id,
+                            'input' => $o->input,
+                            'expected_output' => $o->expected_output,
+                            'actual_output' => $o->actual_output,
+                            'subtest_status' => $o->subtest_status,
+                        ]),
                     ]),
                 ];
             }

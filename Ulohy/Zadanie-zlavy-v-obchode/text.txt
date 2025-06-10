@@ -1,0 +1,27 @@
+Vytvorte funkciu vypocitajZlavu($cenaNakupu, $typZlavy, $urovenZakaznika), ktorá na základe vstupných údajov vypočíta výslednú cenu po zľave.
+Vstupy:
+    - $cenaNakupu (float) – celková cena nákupu v eurách
+
+    - $typZlavy (string) – typ aplikovanej zľavy. Môže nadobúdať hodnoty:
+
+        'bezna' – 10 % zľava
+
+        'specialna' – 20 % zľava, ak je cena vyššia ako 100 €
+
+        'vernostna' – 5 % zľava + extra percento zľava podľa úrovne zákazníka od úrovne 2 do do úrovne 5 jedno percento za úroveň
+
+        'kombinovana' – 15 % zľava, ak je úroveň zákazníka vyššia ako 3
+
+    - $urovenZakaznika (int) – úroveň zákazníka od 1 (nový) do 5 (VIP)
+
+Výstup:
+    - Funkcia vráti výslednú cenu po aplikácii zľavy (float).
+
+Požiadavky:
+    - Zľavy sa nesmú kombinovať, aplikujte len jeden typ zľavy podľa parametra $typZlavy.
+
+    - Pri 'vernostna' zľave pridajte ďalších 2 % zľavy za každú úroveň nad 1 (t.j. úroveň 3 = 5 % + 4 % = 9 %).
+
+    - Zaokrúhlite výslednú cenu na 2 desatinné miesta.
+
+Nezabudnite overiť vstupné hodnoty – napr. či úroveň zákazníka je v rozsahu 1 až 5, inak funkcia môže vrátiť pôvodnú cenu bez zľavy.

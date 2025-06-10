@@ -1,6 +1,5 @@
 FROM php:8.2-cli
 
-WORKDIR /var/www/html
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \
 build-essential \
@@ -46,13 +45,21 @@ RUN git clone https://github.com/google/nsjail /opt/nsjail \
     && make \
     && cp nsjail /usr/local/bin/nsjail
 
-
 # Install Composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-    && php -r "unlink('composer-setup.php');"
+COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
+
+# Copy existing application directory contents
+COPY . /var/www/html/
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache
 
 
+WORKDIR /var/www/html
+
+# Set ownership and permissions for the /var/www/html directory to www-data
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+
+RUN composer install
 # Optional: Node.js for JS
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
@@ -87,12 +94,9 @@ RUN bash -c "ldd /usr/bin/node | awk '{if (\$3 ~ /^\\//) print \$3}' | while rea
 done"
 
 
+WORKDIR /var/www/html
 
-COPY . /var/www/html
-
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-RUN composer install --no-dev --optimize-autoloader
+USER www-data
 
 EXPOSE 8000
 

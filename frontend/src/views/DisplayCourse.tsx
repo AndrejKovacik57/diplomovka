@@ -10,7 +10,15 @@ interface TestResult {
     test_name: string;
     status: string;
     message: string;
+    outputs: {
+        id: number;
+        input: string;
+        expected_output: string;
+        actual_output: string;
+        subtest_status: string;
+    }[];
 }
+
 
 interface Solution {
     id: number;
@@ -53,6 +61,7 @@ const CourseDisplay: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const { t } = useTranslation();
+    const [openTestResultId, setOpenTestResultId] = useState<number | null>(null);
 
 
     useEffect(() => {
@@ -435,33 +444,72 @@ const CourseDisplay: React.FC = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {solution.test_results.length > 0 ? (
-                                                        <div className="mt-4">
-                                                            <div className="grid grid-cols-2">
-                                                                {/* Header row */}
-                                                                <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
-                                                                    {t("solutionFor")}
-                                                                </div>
-                                                                <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
-                                                                    {t("status")}
-                                                                </div>
+                                                    <div className="mt-4">
+                                                        <div className="grid grid-cols-2">
+                                                            {/* Header row - zobrazí sa len raz */}
+                                                            <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
+                                                                {t("solutionFor")}
+                                                            </div>
+                                                            <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
+                                                                {t("status")}
+                                                            </div>
 
-                                                                {/* Data rows */}
-                                                                {solution.test_results.map((res: TestResult) => (
+                                                            {/* Data rows - zobrazia sa v cykle */}
+                                                            {solution.test_results.map((res: TestResult) => {
+                                                                const isOpen = openTestResultId === res.id;
+
+                                                                return (
                                                                     <React.Fragment key={res.id}>
-                                                                        <div className="px-3 py-2 border-b border-gray-200">
+                                                                        <div
+                                                                            className="px-3 py-2 border-b border-gray-200 cursor-pointer"
+                                                                            onClick={() => setOpenTestResultId(isOpen ? null : res.id)}
+                                                                        >
                                                                             {res.test_name}
                                                                         </div>
-                                                                        <div className="px-3 py-2 border-b border-gray-200">
+                                                                        <div
+                                                                            className="px-3 py-2 border-b border-gray-200 cursor-pointer"
+                                                                            onClick={() => setOpenTestResultId(isOpen ? null : res.id)}
+                                                                        >
                                                                             {res.status}
                                                                         </div>
+
+                                                                        {isOpen && (
+                                                                            <div className="col-span-2 border-t border-gray-200 p-4 bg-gray-50">
+                                                                                <h5 className="font-semibold mb-2">{t("testDetails")}</h5>
+                                                                                {res.outputs?.length > 0 ? (
+                                                                                    <table className="w-full text-sm table-auto border border-gray-300">
+                                                                                        <thead className="bg-gray-200">
+                                                                                        <tr>
+                                                                                            <th className="border p-2 text-left">{t('input')}</th>
+                                                                                            <th className="border p-2 text-left">{t('expectedOutput')}</th>
+                                                                                            <th className="border p-2 text-left">{t('actualOutput')}</th>
+                                                                                            <th className="border p-2 text-left">{t('status')}</th>
+                                                                                        </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                        {res.outputs.map((output) => (
+                                                                                            <tr key={output.id}>
+                                                                                                <td className="border p-2">{JSON.stringify(output.input)}</td>
+                                                                                                <td className="border p-2">{JSON.stringify(output.expected_output)}</td>
+                                                                                                <td className="border p-2">{JSON.stringify(output.actual_output)}</td>
+                                                                                                <td className={`border p-2`}>
+                                                                                                    {output.subtest_status}
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        ))}
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                ) : (
+                                                                                    <p className="text-gray-500">{t('noOutputsFound')}</p>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
                                                                     </React.Fragment>
-                                                                ))}
-                                                            </div>
+                                                                );
+                                                            })}
                                                         </div>
-                                                    ) : (
-                                                        <p>{t("noTestFound")}</p>
-                                                    )}
+                                                    </div>
+
 
                                                 </div>
                                             ))

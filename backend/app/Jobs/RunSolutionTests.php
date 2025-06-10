@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Exercise;
 use App\Models\Solution;
 use App\Models\SolutionTestResult;
+use App\Models\TestResultOutput;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -107,26 +108,60 @@ class RunSolutionTests implements ShouldQueue
             } else {
                 $output = $process->getOutput();
                 $lines = explode("\n", trim($output));
-                $results = [
-                    'passed' => [],
-                    'failed' => [],
-                ];
+                $parsedResults = []; // bude: test_name => ['status' => ..., 'outputs' => [...]]
+
                 foreach ($lines as $line) {
-                    if (preg_match('/^\[PASS] (\w+)/', $line, $matches)) {
-                        $results['passed'][] = $matches[1];
-                    } elseif (preg_match('/^\[FAIL] (\w+)/', $line, $matches)) {
-                        $results['failed'][] = $matches[1];
+                    if (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| input: \'(.*?)\' \| expected: \'(.*?)\' \| got: \'(.*?)\'/', $line, $matches)) {                        $parsedResults[$matches[2]]['outputs'][] = [
+                            'status' => strtolower($matches[1]) === 'pass' ? TestResultOutput::STATUS_PASS : TestResultOutput::STATUS_FAIL,
+                            'input' => $matches[3],
+                            'expected_output' => $matches[4],
+                            'actual_output' => $matches[5],
+                        ];
+                    }
+                    // Celkový výstup pre test (na konci)
+                    elseif (preg_match('/^\[(PASS|FAIL)\] (\w+)$/', $line, $matches)) {
+                        $parsedResults[$matches[2]]['status'] = strtolower($matches[1]) === 'pass'
+                            ? SolutionTestResult::STATUS_PASSED
+                            : SolutionTestResult::STATUS_FAILED;
+                    }
+                    else {
+                        Log::debug("Nepodarilo sa naparsovat riadok: '$line'");
                     }
                 }
+
                 $solutionId = $this->solution->id;
-                DB::transaction(function () use ($results, $solutionId) {
+
+                DB::transaction(function () use ($parsedResults, $solutionId) {
+                    $totalTests = count($parsedResults);
+                    $passed = count(array_filter($parsedResults, fn($r) => $r['status'] === SolutionTestResult::STATUS_PASSED));
+
                     $this->solution->test_status = Solution::STATUS_FINISHED;
-                    $this->solution->test_output = count($results['passed']) . '/' .
-                        (count($results['passed']) + count($results['failed']));
+                    $this->solution->test_output = "$passed/$totalTests";
                     $this->solution->save();
 
-                    $this->createTestResult($results, 'passed', $solutionId);
-                    $this->createTestResult($results, 'failed', $solutionId);
+                    Log::info("solution status update");
+
+                    foreach ($parsedResults as $testName => $result) {
+                        $testResult = SolutionTestResult::create([
+                            'solution_id' => $solutionId,
+                            'test_name' => $testName,
+                            'status' => $result['status'],
+                            'message' => null, // voliteľné
+                        ]);
+
+                        Log::info("vytvoreny testresult ".$testResult->test_name);
+                        foreach ($result['outputs'] ?? [] as $output) {
+                            Log::info(" output status ".$output['status']);
+                            $testOutput = $testResult->outputs()->create([
+                                'input' => $output['input'],
+                                'expected_output' => $output['expected_output'],
+                                'actual_output' => $output['actual_output'],
+                                'subtest_status' => $output['status'],
+                            ]);
+
+                            Log::info("vytvoreny outputs ".$testOutput->input);
+                        }
+                    }
                 });
             }
 

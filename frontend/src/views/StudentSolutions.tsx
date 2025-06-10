@@ -1,14 +1,23 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axiosClient from "../axios-client";
 import { useStateContext } from "../contexts/ContextProvider";
 import Spinner from "../components/Spinner.tsx";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
+
+interface TestResultOutput {
+    id: number;
+    input: any;
+    expected_output: any;
+    actual_output: any;
+    subtest_status: string;
+}
 
 interface TestResult {
     id: number;
     test_name: string;
     status: string;
     message: string;
+    outputs: TestResultOutput[];
 }
 
 interface Solution {
@@ -38,8 +47,10 @@ const StudentSolutions: React.FC = () => {
     const [courses, setCourses] = useState<CourseWithSolutions[]>([]);
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
-    const selectedCourse = courses.find((course) => course.id === selectedCourseId);
+    const [openTestResultId, setOpenTestResultId] = useState<number | null>(null);
     const { t } = useTranslation();
+
+    const selectedCourse = courses.find((course) => course.id === selectedCourseId);
 
     const loadSolutions = useCallback(() => {
         if (user) {
@@ -76,7 +87,6 @@ const StudentSolutions: React.FC = () => {
             <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-5xl">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">{t('yourSolutions')}</h1>
-
                 </div>
 
                 {courses.length === 0 ? (
@@ -98,8 +108,8 @@ const StudentSolutions: React.FC = () => {
                                     </option>
                                 ))}
                             </select>
-
                         </div>
+
                         <div className="mb-6">
                             <button
                                 onClick={loadSolutions}
@@ -117,7 +127,7 @@ const StudentSolutions: React.FC = () => {
                                             <div key={solution.id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
                                                 <h4 className="text-lg font-semibold mb-2">Solution for {exercise.title}</h4>
                                                 <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-2 md:space-y-0">
-                                                    <div><strong> {t('status')}:</strong> {solution.test_status}</div>
+                                                    <div><strong>{t('status')}:</strong> {solution.test_status}</div>
                                                     <div><strong>{t('submittedAt')}:</strong> {new Date(solution.submitted_at).toLocaleString()}</div>
                                                     <div><strong>{t('testResult')}:</strong> {solution.test_output}</div>
                                                 </div>
@@ -127,16 +137,57 @@ const StudentSolutions: React.FC = () => {
                                                         <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300">{t('testName')}</div>
                                                         <div className="font-bold bg-gray-100 px-4 py-2 border-b border-gray-300 text-right">{t('status')}</div>
 
-                                                        {solution.test_results.map((result, index) => (
-                                                            <React.Fragment key={result.id}>
-                                                                <div className={`px-4 py-2 border-t border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                                                    {result.test_name}
-                                                                </div>
-                                                                <div className={`px-4 py-2 border-t border-gray-200 text-right ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                                                    {result.status}
-                                                                </div>
-                                                            </React.Fragment>
-                                                        ))}
+                                                        {solution.test_results.map((result, index) => {
+                                                            const isOpen = openTestResultId === result.id;
+                                                            return (
+                                                                <React.Fragment key={result.id}>
+                                                                    <div
+                                                                        className={`px-4 py-2 border-t border-gray-200 cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                                                        onClick={() => setOpenTestResultId(isOpen ? null : result.id)}
+                                                                    >
+                                                                        {result.test_name}
+                                                                    </div>
+                                                                    <div
+                                                                        className={`px-4 py-2 border-t border-gray-200 text-right cursor-pointer ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                                                                        onClick={() => setOpenTestResultId(isOpen ? null : result.id)}
+                                                                    >
+                                                                        {result.status}
+                                                                    </div>
+
+                                                                    {isOpen && (
+                                                                        <div className="col-span-2 border-t border-gray-200 p-4 bg-gray-100">
+                                                                            <h5 className="font-semibold mb-2">{t('testDetails')}</h5>
+                                                                            {result.outputs.length > 0 ? (
+                                                                                <table className="w-full text-sm table-auto border border-gray-300">
+                                                                                    <thead className="bg-gray-200">
+                                                                                    <tr>
+                                                                                        <th className="border p-2 text-left">{t('input')}</th>
+                                                                                        <th className="border p-2 text-left">{t('expectedOutput')}</th>
+                                                                                        <th className="border p-2 text-left">{t('actualOutput')}</th>
+                                                                                        <th className="border p-2 text-left">{t('status')}</th>
+                                                                                    </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                    {result.outputs.map((output) => (
+                                                                                        <tr key={output.id}>
+                                                                                            <td className="border p-2">{JSON.stringify(output.input)}</td>
+                                                                                            <td className="border p-2">{JSON.stringify(output.expected_output)}</td>
+                                                                                            <td className="border p-2">{JSON.stringify(output.actual_output)}</td>
+                                                                                            <td className={`border p-2`}>
+                                                                                                {output.subtest_status}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            ) : (
+                                                                                <p className="text-gray-500">{t('noOutputsFound')}</p>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </React.Fragment>
+                                                            );
+                                                        })}
                                                     </div>
                                                 ) : (
                                                     <p className="text-gray-500 mt-2">{t('noTestFound')}</p>
