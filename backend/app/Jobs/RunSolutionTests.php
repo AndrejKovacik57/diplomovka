@@ -118,7 +118,8 @@ class RunSolutionTests implements ShouldQueue
                 $parsedResults = []; // bude: test_name => ['status' => ..., 'outputs' => [...]]
 
                 foreach ($lines as $line) {
-                    if (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| input: \'(.*?)\' \| expected: \'(.*?)\' \| got: \'(.*?)\'/', $line, $matches)) {
+                    // [PASS|FAIL] ... | input: ... | expected: ... | got: ...
+                    if (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| input: \'?(.*?)\'? \| expected: \'?(.*?)\'? \| got: \'?(.*?)\'?$/', $line, $matches)) {
                         $parsedResults[$matches[2]]['outputs'][] = [
                             'status' => strtolower($matches[1]) === 'pass' ? TestResultOutput::STATUS_PASS : TestResultOutput::STATUS_FAIL,
                             'input' => $matches[3],
@@ -126,12 +127,13 @@ class RunSolutionTests implements ShouldQueue
                             'actual_output' => $matches[5],
                         ];
                     }
-                    // pridane: parsovanie ako [PASS] test_nacitajZakaznikov | loaded: 2 records
-                    elseif (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| loaded: \d+ records$/', $line, $matches)) {
+                    // [PASS|FAIL] ... | loaded: ... records
+                    elseif (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| loaded: \'?\d+\'? records$/', $line, $matches)) {
                         $parsedResults[$matches[2]]['status'] = strtolower($matches[1]) === 'pass'
                             ? SolutionTestResult::STATUS_PASSED
                             : SolutionTestResult::STATUS_FAILED;
                     }
+                    // [PASS|FAIL] testName (bez detailov)
                     elseif (preg_match('/^\[(PASS|FAIL)\] (\w+)$/', $line, $matches)) {
                         $parsedResults[$matches[2]]['status'] = strtolower($matches[1]) === 'pass'
                             ? SolutionTestResult::STATUS_PASSED
@@ -141,6 +143,7 @@ class RunSolutionTests implements ShouldQueue
                         Log::debug("Nepodarilo sa naparsovat riadok: '$line'");
                     }
                 }
+
 
 
                 $solutionId = $this->solution->id;
