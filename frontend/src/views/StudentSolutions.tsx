@@ -173,7 +173,7 @@ const StudentSolutions: React.FC = () => {
                                                                                             <td className="border p-2">{JSON.stringify(output.input)}</td>
                                                                                             <td className="border p-2">{JSON.stringify(output.expected_output)}</td>
                                                                                             <td className="border p-2">{JSON.stringify(output.actual_output)}</td>
-                                                                                            <td className={`border p-2`}>
+                                                                                            <td className={`border p-2 font-semibold ${output.subtest_status === 'passed' ? 'text-green-600' : 'text-red-600'}`}>
                                                                                                 {output.subtest_status}
                                                                                             </td>
                                                                                         </tr>
