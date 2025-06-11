@@ -65,7 +65,7 @@ const StudentExerciseDisplay = () => {
                     <div className="space-y-6">
                         <div>
                             <h2 className="text-2xl font-bold mb-2">{exerciseDetails.exercise.title}</h2>
-                            <p className="text-gray-700">{exerciseDetails.exercise.description}</p>
+                            <p style="white-space: pre-wrap;" className="text-gray-700">{exerciseDetails.exercise.description}</p>
                         </div>
 
                         <div>

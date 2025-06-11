@@ -188,7 +188,7 @@ const ExerciseDisplay: React.FC = () => {
                                 className="w-full border rounded px-3 py-2 mb-4"
                             />
                         ) : (
-                            <p className="mb-4">{exerciseDetails.exercise.description}</p>
+                            <p style="white-space: pre-wrap;" className="mb-4">{exerciseDetails.exercise.description}</p>
                         )}
 
                         {isEditMode ? (
