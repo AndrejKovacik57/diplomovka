@@ -90,13 +90,20 @@ class RunSolutionTests implements ShouldQueue
                 '--chroot', '/sandbox',
                 '--time_limit', '10',
                 '--rlimit_as', 'max',
+                '--disable_clone_newuser',
                 '--disable_clone_newnet',
+                '--disable_clone_newpid',
+                '--disable_clone_newcgroup',
+                '--disable_clone_newns',
+                '--disable_clone_newuts',
+                '--disable_clone_newipc',
                 '--disable_proc',
                 '--', $binary, "/test/{$test_name}"
             ]);
 
             $process->setTimeout(10);
             $process->run();
+
 
             if (!$process->isSuccessful()) {
                 $erroutput = $process->getErrorOutput();

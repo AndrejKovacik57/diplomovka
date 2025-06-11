@@ -1,0 +1,44 @@
+[
+  {
+    "meno": "Jana Novak",
+    "uroven": 3,
+    "typZlavy": "vernostna",
+    "nakup": 85.00
+  },
+  {
+    "meno": "Peter Maly",
+    "uroven": 5,
+    "typZlavy": "kombinovana",
+    "nakup": 200.00
+  },
+  {
+    "meno": "Lucia Nova",
+    "uroven": 2,
+    "typZlavy": "bezna",
+    "nakup": 120.00
+  },
+  {
+    "meno": "Martin Kral",
+    "uroven": 4,
+    "typZlavy": "specialna",
+    "nakup": 105.50
+  },
+  {
+    "meno": "Eva Ticha",
+    "uroven": 1,
+    "typZlavy": "vernostna",
+    "nakup": 60.00
+  },
+  {
+    "meno": "Roman Sykora",
+    "uroven": 5,
+    "typZlavy": "specialna",
+    "nakup": 99.99
+  },
+  {
+    "meno": "Tomas Hruby",
+    "uroven": 4,
+    "typZlavy": "kombinovana",
+    "nakup": 88.00
+  }
+]

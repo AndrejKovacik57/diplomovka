@@ -1,7 +1,9 @@
 services:
 
   frontend:
-    image: andrejkovacik/frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: frontend
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -16,7 +18,9 @@ services:
     restart: always
 
   backend:
-    image: andrejkovacik/backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: backend
     env_file:
       - ./backend/.env
@@ -71,7 +75,9 @@ services:
     networks:
       - app-network
     volumes:
-      - ./backend/:/var/www/html/
+      - ./backend/storage:/var/www/html/storage
+    cap_add:
+      - SYS_CHROOT
     command: php artisan queue:work --verbose --tries=3 --timeout=90
     restart: always
 

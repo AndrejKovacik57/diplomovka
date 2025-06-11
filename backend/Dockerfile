@@ -30,6 +30,8 @@ build-essential \
     protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*
 
+
+
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-configure ldap \
@@ -37,7 +39,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
-
 
 # Clone and build nsjail
 RUN git clone https://github.com/google/nsjail /opt/nsjail \
@@ -48,26 +49,22 @@ RUN git clone https://github.com/google/nsjail /opt/nsjail \
 # Install Composer
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 
-# Copy existing application directory contents
+# Copy application source
 COPY . /var/www/html/
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache
 
-
 WORKDIR /var/www/html
 
-# Set ownership and permissions for the /var/www/html directory to www-data
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-
+# Install PHP dependencies
 RUN composer install
-# Optional: Node.js for JS
+
+# Optional: Node.js for JS-based code
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Setup
-# Create sandbox folders
-RUN mkdir -p /sandbox
-RUN mkdir -p /sandbox/test && chown -R www-data:www-data /sandbox
+# Set up sandbox environment
+RUN mkdir -p /sandbox/test
+RUN chown -R www-data:www-data /sandbox
 
 # Copy PHP binary
 RUN mkdir -p /sandbox/usr/local/bin
@@ -93,11 +90,10 @@ RUN bash -c "ldd /usr/bin/node | awk '{if (\$3 ~ /^\\//) print \$3}' | while rea
     mkdir -p \"/sandbox\$(dirname \$lib)\" && cp -v \"\$lib\" \"/sandbox\$lib\"; \
 done"
 
-
-WORKDIR /var/www/html
-
-USER www-data
+RUN ln -snf /usr/share/zoneinfo/Europe/Bratislava /etc/localtime && echo "Europe/Bratislava" > /etc/timezone
 
 EXPOSE 8000
 
+
+# Start Laravel development server by default
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

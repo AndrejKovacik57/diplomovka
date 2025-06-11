@@ -67,9 +67,9 @@ class UserSeeder extends Seeder
           [
               "Meno"=> "Martin",
             "Priezvisko"=> "Urban",
-            "Email"=> "martinurban@gmail.com",
+            "Email"=> "martinurban1@gmail.com",
             "Heslo"=> "Heslo123!",
-            "uid"=> "xurbanm"
+            "uid"=> "xurbanm1"
           ],
           [
               "Meno"=> "Michal",
@@ -172,9 +172,9 @@ class UserSeeder extends Seeder
           [
               "Meno"=> "Marek",
             "Priezvisko"=> "Novák",
-            "Email"=> "mareknovak@gmail.com",
+            "Email"=> "mareknovak2@gmail.com",
             "Heslo"=> "Heslo123!",
-            "uid"=> "xnovakm"
+            "uid"=> "xnovakm2"
           ],
           [
               "Meno"=> "Zuzana",
@@ -270,9 +270,9 @@ class UserSeeder extends Seeder
           [
               "Meno"=> "Michal",
             "Priezvisko"=> "Novák",
-            "Email"=> "michalnovak@gmail.com",
+            "Email"=> "michalnovak1@gmail.com",
             "Heslo"=> "Heslo123!",
-            "uid"=> "xnovakm"
+            "uid"=> "xnovakm1"
           ],
           [
               "Meno"=> "Tomáš",
@@ -333,9 +333,9 @@ class UserSeeder extends Seeder
           [
               "Meno"=> "Martin",
             "Priezvisko"=> "Urban",
-            "Email"=> "martinurban@gmail.com",
+            "Email"=> "martinurban2@gmail.com",
             "Heslo"=> "Heslo123!",
-            "uid"=> "xurbanm"
+            "uid"=> "xurbanm2"
           ],
           [
               "Meno"=> "Natália",

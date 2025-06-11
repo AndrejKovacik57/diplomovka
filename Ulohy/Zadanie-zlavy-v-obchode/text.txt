@@ -2,13 +2,13 @@ Vytvorte funkciu vypocitajZlavu($cenaNakupu, $typZlavy, $urovenZakaznika), ktor�
 Vstupy:
     - $cenaNakupu (float) – celková cena nákupu v eurách
 
-    - $typZlavy (string) – typ aplikovanej zľavy. Môže nadobúdať hodnoty:
+    - $typZlavy (string) – typ aplikovanej zľavy. Môže nadobúdať hodnoty: Podľa obrázkov
 
-        'bezna' – 10 % zľava
+        'bezna'
 
-        'specialna' – 20 % zľava, ak je cena vyššia ako 100 €
+        'specialna'
 
-        'vernostna' – 5 % zľava + extra percento zľava podľa úrovne zákazníka od úrovne 2 do do úrovne 5 jedno percento za úroveň
+        'vernostna'
 
         'kombinovana' – 15 % zľava, ak je úroveň zákazníka vyššia ako 3
 
@@ -17,11 +17,38 @@ Vstupy:
 Výstup:
     - Funkcia vráti výslednú cenu po aplikácii zľavy (float).
 
-Požiadavky:
-    - Zľavy sa nesmú kombinovať, aplikujte len jeden typ zľavy podľa parametra $typZlavy.
-
-    - Pri 'vernostna' zľave pridajte ďalších 2 % zľavy za každú úroveň nad 1 (t.j. úroveň 3 = 5 % + 4 % = 9 %).
-
     - Zaokrúhlite výslednú cenu na 2 desatinné miesta.
 
+Vytvorte funkciu nacitajZakaznikov(string $subor="customers.json"))
+Vstupy:
+    -$subor - cesta ku json suboru
+Výstup:
+    - asociatívne pole s hodnotamy podla json: meno, uroven, typZlavy, nakup
+
+Vytvorte funkciu function transformujZakaznikovAUplatniZlavu(string $meno, bool $doVelkych, bool $reverse, bool $reverseWords, string $oddelovac = "_"):
+Vstupy:
+    - $zakaznik - asociativne pole reprezentujúce jedného zákaznika z načítaného json
+    - $doVelkych - ak bude true tak sa cele meno zákaznika dá do veĺkých
+    - $reverseWords - Prehodí meno a priezvisko
+    - $reverse - zmení poradie všetkých písmen v mene a priezvisku
+    - $oddelovac - znak pre oddelenie úrovne od mena _, -, : (default: _)
+Dodatočné informácie:
+    funkcia vykoná nasledujúce poziadavky v danom poradí. 
+    1. zmena mena na velké podla $doVelkych
+    2. ak je $reverseWords a $reverse true naraz tak sa najprv zmení poradie Mena Priezviska a následne sa zmení poradie písmen inak sa vykoná len čo je nastavené ako true
+    3. na koniec upraveného mena sa priradí zákaznikova úroven s oddelovačom medzi menom a úrovňou zákazníka
+    4. na cenu nákupu sa aplikuje zľava podľa typu zľavy
+Výstup:
+    Asociatívne pole obsahujúce odnoty
+    - upraveneMeno - meno po všetkých zvolených úpravách
+    - finálnaCena - cena nákupu po aplikovaní zľavy
+ 
+Vytvorte funkciu function ulozDoCSV(array $data, string $subor="results.csv")
+Vstupy:
+    - $data - list asociatývnych polí z funkcie transformujZakaznikovAUplatniZlavu
+    - $subor - názov súboru na uloženie
+Dodatočné informácie:
+    Výstupné csv bude obsahovať hodnoty upraveneMeno a finálnaCena z funcie transformujZakaznikovAUplatniZlavu
+
 Nezabudnite overiť vstupné hodnoty – napr. či úroveň zákazníka je v rozsahu 1 až 5, inak funkcia môže vrátiť pôvodnú cenu bez zľavy.
+Je možne používať pomocné funkcie ale popísaé funkcie musia mať potrebný výstup pretože budú testované.
