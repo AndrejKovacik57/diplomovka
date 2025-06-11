@@ -158,54 +158,27 @@ class RunSolutionTests implements ShouldQueue
 
                     Log::info("solution status update");
 
-                    foreach ($lines as $line) {
-                        // [PASS|FAIL] ... | input: ... | expected: ... | got: ...
-                        if (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| input: \'?(.*?)\'? \| expected: \'?(.*?)\'? \| got: \'?(.*?)\'?$/', $line, $matches)) {
-                            $parsedResults[$matches[2]]['outputs'][] = [
-                                'status' => strtolower($matches[1]) === 'pass' ? TestResultOutput::STATUS_PASS : TestResultOutput::STATUS_FAIL,
-                                'input' => $matches[3],
-                                'expected_output' => $matches[4],
-                                'actual_output' => $matches[5],
-                            ];
-                        }
+                    foreach ($parsedResults as $testName => $result) {
+                        $testResult = SolutionTestResult::create([
+                            'solution_id' => $solutionId,
+                            'test_name' => $testName,
+                            'status' => $result['status'],
+                            'message' => null, // voliteľné
+                        ]);
 
-                        // [PASS|FAIL] ... | doVelkych: ... | reverse: ... | reverseWords: ... | expected: ... cena: ...| got: ... cena: ...
-                        elseif (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| doVelkych: \'(.*?)\' \| reverse: \'(.*?)\' \| reverseWords: \'(.*?)\' \| expected: \'(.*?)\' cena: \'(.*?)\'\| got: \'(.*?)\' cena: \'(.*?)\'$/', $line, $matches)) {
-                            $parsedResults[$matches[2]]['outputs'][] = [
-                                'status' => strtolower($matches[1]) === 'pass' ? TestResultOutput::STATUS_PASS : TestResultOutput::STATUS_FAIL,
-                                'input' => "doVelkych={$matches[3]}, reverse={$matches[4]}, reverseWords={$matches[5]}",
-                                'expected_output' => "{$matches[6]} cena: {$matches[7]}",
-                                'actual_output' => "{$matches[8]} cena: {$matches[9]}",
-                            ];
-                        }
+                        Log::info("vytvoreny testresult ".$testResult->test_name);
+                        foreach ($result['outputs'] ?? [] as $output) {
+                            Log::info(" output status ".$output['status']);
+                            $testOutput = $testResult->outputs()->create([
+                                'input' => $output['input'],
+                                'expected_output' => $output['expected_output'],
+                                'actual_output' => $output['actual_output'],
+                                'subtest_status' => $output['status'],
+                            ]);
 
-                        // [PASS|FAIL] ... | loaded: ... records
-                        elseif (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| loaded: \'?\d+\'? records$/', $line, $matches)) {
-                            $parsedResults[$matches[2]]['status'] = strtolower($matches[1]) === 'pass'
-                                ? SolutionTestResult::STATUS_PASSED
-                                : SolutionTestResult::STATUS_FAILED;
-                        }
-
-                        // [PASS|FAIL] ... | file: ...
-                        elseif (preg_match('/^\[(PASS|FAIL)\] ([^\|]+) \| file: .+$/', $line, $matches)) {
-                            $parsedResults[$matches[2]]['status'] = strtolower($matches[1]) === 'pass'
-                                ? SolutionTestResult::STATUS_PASSED
-                                : SolutionTestResult::STATUS_FAILED;
-                        }
-
-                        // [PASS|FAIL] testName (no details)
-                        elseif (preg_match('/^\[(PASS|FAIL)\] (\w+)$/', $line, $matches)) {
-                            $parsedResults[$matches[2]]['status'] = strtolower($matches[1]) === 'pass'
-                                ? SolutionTestResult::STATUS_PASSED
-                                : SolutionTestResult::STATUS_FAILED;
-                        }
-
-                        // Unknown/unparseable line
-                        else {
-                            Log::debug("Nepodarilo sa naparsovat riadok: '$line'");
+                            Log::info("vytvoreny outputs ".$testOutput->input);
                         }
                     }
-
                 });
             }
 
